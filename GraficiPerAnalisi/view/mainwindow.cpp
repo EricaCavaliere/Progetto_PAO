@@ -1,7 +1,9 @@
 #include "mainwindow.h"
+#include "graficolinea.h"
+
 
 MainWindow::MainWindow(QWidget *parent)
-    :QMainWindow(parent),nPunti(20),valoreMax(100),nLinee(2),tabella(generateRandomData(nLinee,valoreMax,nPunti)){
+    :QMainWindow(parent),nPunti(10),valoreMax(100),nLinee(2),tabella(generateRandomData(nLinee,valoreMax,nPunti)){
 
     setMinimumSize(500,500);
 
@@ -11,24 +13,37 @@ MainWindow::MainWindow(QWidget *parent)
     QMenu* file = new QMenu("File",menuBar);
     QAction* nuovo = new QAction("Nuovo",file);
     QAction* apri = new QAction("Apri",file);
+    QAction* salva = new QAction("Salva",file);
+    QAction* salvaTutto = new QAction("Salva tutto",file);
     QAction* chiudi = new QAction("Chiudi",file);
     menuBar->addMenu(file);
     file->addAction(nuovo);
     file->addAction(apri);
+    file->addAction(salva);
+    file->addAction(salvaTutto);
     file->addAction(chiudi);
 
-    QTabWidget *tab = new QTabWidget(this);
-    QChartView* linea = new QChartView(creaGraficoLinea());
-    QChartView* torta = new QChartView(creaGraficoTorta());
-    QChartView* punti = new QChartView(creaGraficoPunti());
+    QMenu* finestra = new QMenu("Finestra",menuBar);
+    QAction* colore = new QAction("Colore",finestra);
+    QAction* legenda = new QAction("Legenda",finestra);
+    QAction* animazione = new QAction("Animazione",finestra);
+    menuBar->addMenu(finestra);
+    finestra->addAction(colore);
+    finestra->addAction(legenda);
+    finestra->addAction(animazione);
 
-    QTabBar* schede = new QTabBar(tab);
+    QTabWidget *tab = new QTabWidget(this);
+    tab->addTab(creaGraficoLinea(),tr("Grafico Linea"));
+    tab->addTab(creaGraficoTorta(),tr("Grafico Torta"));
+    tab->addTab(creaGraficoPunti(),tr("Grafico Punti"));
+
     setCentralWidget(tab);
+
 }
 
 MainWindow::~MainWindow(){}
 
-QChart* MainWindow::creaGraficoLinea()const{
+QChartView* MainWindow::creaGraficoLinea()const{
 
     QChart *chart = new QChart();
     chart->setTitle("Grafico a Linea");
@@ -44,14 +59,16 @@ QChart* MainWindow::creaGraficoLinea()const{
         chart->addSeries(series);
     }
     chart->createDefaultAxes();
-    return chart;
+    QChartView* view = new QChartView(chart);
+    return view;
 }
 
-QChart* MainWindow::creaGraficoTorta() const
+QChartView* MainWindow::creaGraficoTorta() const
 {
     QChart *chart = new QChart();
     chart->setTitle("Grafico a Torta");
 
+    qreal pieSize = 1.0 / tabella.count();
     for (int i = 0; i < tabella.count(); i++) {
         QPieSeries *series = new QPieSeries(chart);
         for (const Punto &data : tabella[i]) {
@@ -62,17 +79,19 @@ QChart* MainWindow::creaGraficoTorta() const
                 slice->setExploded();
             }
         }
-        //qreal hPos = (pieSize / 2) + (i / (qreal) tabella.count());
-        //series->setPieSize(pieSize);
-        //series->setHorizontalPosition(hPos);
-        //series->setVerticalPosition(0.5);
+        //serve per posizionare in modo corretto i grafici a torta
+        qreal hPos = (pieSize / 2) + (i / (qreal) tabella.count());
+        series->setPieSize(pieSize);
+        series->setHorizontalPosition(hPos);
+        series->setVerticalPosition(0.5);
+
         chart->addSeries(series);
     }
-
-    return chart;
+    QChartView* view = new QChartView(chart);
+    return view;
 }
 
-QChart* MainWindow::creaGraficoPunti() const
+QChartView* MainWindow::creaGraficoPunti() const
 {
     // scatter chart
     QChart *chart = new QChart();
@@ -88,7 +107,8 @@ QChart* MainWindow::creaGraficoPunti() const
         chart->addSeries(series);
     }
     chart->createDefaultAxes();
-    return chart;
+    QChartView* view = new QChartView(chart);
+    return view;
 }
 
 DatiTabella MainWindow::generateRandomData(int listCount, int valueMax, int valueCount) const

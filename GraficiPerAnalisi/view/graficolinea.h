@@ -12,8 +12,7 @@ class GraficoLinea: public QWidget
 {
     Q_OBJECT
 public:
-    GraficoLinea(unsigned int=5,int=100,unsigned int=1);
-    virtual ~GraficoLinea();
+    explicit GraficoLinea(QWidget*, unsigned int=5,int=100,unsigned int=1);
 
     DatiTabella generateRandomData(int,int,int)const;
 private:

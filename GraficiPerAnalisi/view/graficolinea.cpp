@@ -1,7 +1,7 @@
 #include "graficolinea.h"
 
-GraficoLinea::GraficoLinea(unsigned int p,int m,unsigned int l)
-    :nPunti(p),valoreMax(m),nLinee(l),dTabella(generateRandomData(l,m,p)){
+GraficoLinea::GraficoLinea(QWidget* parent, unsigned int p,int m,unsigned int l)
+    :QWidget(parent), nPunti(p),valoreMax(m),nLinee(l),dTabella(generateRandomData(l,m,p)){
 
     QChart *chart = new QChart();
     chart->setTitle("Grafico a Linea");
@@ -16,9 +16,8 @@ GraficoLinea::GraficoLinea(unsigned int p,int m,unsigned int l)
         nameIndex++;
         chart->addSeries(series);
     }
-}
 
-GraficoLinea::~GraficoLinea(){}
+}
 
 DatiTabella GraficoLinea::generateRandomData(int listCount, int valueMax, int valueCount) const
 {

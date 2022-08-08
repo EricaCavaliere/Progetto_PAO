@@ -24,9 +24,9 @@ public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    QChart* creaGraficoLinea()const;
-    QChart* creaGraficoTorta()const;
-    QChart* creaGraficoPunti()const;
+    QChartView* creaGraficoLinea()const;
+    QChartView* creaGraficoTorta()const;
+    QChartView* creaGraficoPunti()const;
     DatiTabella generateRandomData(int,int,int)const;
 
 private:
