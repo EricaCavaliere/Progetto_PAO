@@ -17,8 +17,13 @@ MainWindow::MainWindow(QWidget *parent)
     file->addAction(apri);
     file->addAction(chiudi);
 
-    QChartView *chartView = new QChartView(creaGraficoPunti());
-    setCentralWidget(chartView);
+    QTabWidget *tab = new QTabWidget(this);
+    QChartView* linea = new QChartView(creaGraficoLinea());
+    QChartView* torta = new QChartView(creaGraficoTorta());
+    QChartView* punti = new QChartView(creaGraficoPunti());
+
+    QTabBar* schede = new QTabBar(tab);
+    setCentralWidget(tab);
 }
 
 MainWindow::~MainWindow(){}
