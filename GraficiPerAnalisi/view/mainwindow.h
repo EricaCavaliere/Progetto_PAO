@@ -21,18 +21,41 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-
+/*
+private slots:
+    void menu_file_nuovo();
+    void menu_file_apri();
+    void menu_file_slava();
+    void menu_file_salvaTutto();
+    void menu_file_chiudi();
+    void menu_finestra_legenda(int);
+    void menu_finestra_animazione();
+    void menu_altro_impostazioni();
+    void menu_altro_info();
+    void tab_close();
+    void pulsante_aggiungiColonna();
+    void pulsante_aggiungiRiga();
+    void pulsante_eliminaColonna();
+    void pulsante_eliminaRiga();
+    void modificaCella();
+*/
+private:
+    void impostaMenuBar(QMenuBar*)const;
+    QSplitter* impostaGrafico(QWidget* = 0,unsigned int=0)const;
+    QWidget* baseTabella(QWidget* = 0,unsigned int=0) const;
+    QWidget* impostaOpzioniTabella(QWidget* = 0)const;
+    QTableView* creaTabella(unsigned int=0)const;
     QChartView* creaGraficoLinea()const;
-    QChartView* creaGraficoTorta()const;
     QChartView* creaGraficoPunti()const;
+    QChartView* creaGraficoTorta()const;
+
     DatiTabella generateRandomData(int,int,int)const;
 
-private:
     int nPunti;
     int valoreMax;
-    int nLinee;
+    unsigned int nLinee;
     DatiTabella tabella;
 
 };

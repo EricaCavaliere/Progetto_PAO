@@ -10,24 +10,20 @@ CONFIG += c++17
 
 SOURCES += \
     main.cpp \
-    view/graficolinea.cpp \
     view/mainwindow.cpp \
     model/campione.cpp \
     model/sostanza.cpp \
     model/elemento.cpp \
     model/composto.cpp \
-    model/miscela.cpp \
-    view/punto.cpp
+    model/miscela.cpp
 
 HEADERS += \
-    view/graficolinea.h \
     view/mainwindow.h \
     model/campione.h \
     model/sostanza.h \
     model/elemento.h \
     model/composto.h \
-    model/miscela.h \
-    view/punto.h
+    model/miscela.h
 
 
 # Default rules for deployment.
