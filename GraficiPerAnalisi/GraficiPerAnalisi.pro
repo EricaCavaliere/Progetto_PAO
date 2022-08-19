@@ -10,6 +10,7 @@ CONFIG += c++17
 
 SOURCES += \
     main.cpp \
+    view/datigrafico.cpp \
     view/mainwindow.cpp \
     model/campione.cpp \
     model/sostanza.cpp \
@@ -18,6 +19,7 @@ SOURCES += \
     model/miscela.cpp
 
 HEADERS += \
+    view/datigrafico.h \
     view/mainwindow.h \
     model/campione.h \
     model/sostanza.h \
