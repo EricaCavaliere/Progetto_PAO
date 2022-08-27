@@ -15,29 +15,33 @@ class DatiGrafico
 public:
     enum TipoGrafico{linea=0,punti=1,torta=2};
 
-    DatiGrafico(int=0,int=0,int=0,TipoGrafico=linea,QString="Grafico");
+    DatiGrafico(int numP=0, int vMax=0, int numL=0,TipoGrafico=linea,QString="Grafico");
     DatiGrafico(DatiGrafico&);
     ~DatiGrafico();
 
-    int getX(int,int)const;
-    int getY(int,int)const;
-    QString getNome(int,int)const;
-    DatiPunto getPunto(int,int)const;
-    DatiLinea getLinea(int)const;
+    int getX(int indexLinea,int indexPunto)const;
+    int getY(int indexLinea,int indexPunto)const;
+    QString getNome(int indexLinea,int indexPunto)const;
+    DatiPunto getPunto(int indexLinea,int indexPunto)const;
+    DatiLinea getLinea(int indexLinea)const;
     DatiTabella getTabella()const; //forse da eliminare... //forse no!
     TipoGrafico getTipo()const;
     QString getTitolo()const;
 
-    void setPunto(int,int,int,int);
-    void setPunto(QString,int,int);
-    void setPunto(QString,int,int,int,int);
-    void setPunto(DatiPunto&,int,int);
-    void setLinea(QString,int);
-    void setLinea(DatiLinea&,int);
+    void setPunto(int x,int y,int indexLinea,int indexPunto);
+    void setPunto(QString n,int indexLinea,int indexPunto);
+    void setPunto(QString n,int x,int y,int indexLinea,int indexPunto);
+    void setPunto(DatiPunto& d,int indexLinea,int indexPunto);
+    void setLinea(QString nome, int indexLinea);
+    void setLinea(DatiLinea& l,int indexLinea);
     void setTitolo(QString);
 
+    void addLinea(DatiLinea&);
+    void removeLinea();
+    void removeLinea(int indexLinea);
+
     int count()const;
-    int count(int)const;
+    int count(int indexLinea)const;
 
     DatiTabella generateRandomData(int,int,int) const;
 private:

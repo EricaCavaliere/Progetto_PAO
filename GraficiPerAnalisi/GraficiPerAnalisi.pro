@@ -16,7 +16,8 @@ SOURCES += \
     model/sostanza.cpp \
     model/elemento.cpp \
     model/composto.cpp \
-    model/miscela.cpp
+    model/miscela.cpp \
+    view/modificatabella.cpp
 
 HEADERS += \
     view/datigrafico.h \
@@ -25,7 +26,8 @@ HEADERS += \
     model/sostanza.h \
     model/elemento.h \
     model/composto.h \
-    model/miscela.h
+    model/miscela.h \
+    view/modificatabella.h
 
 
 # Default rules for deployment.

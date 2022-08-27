@@ -41,15 +41,15 @@ private:
 private slots:
     void menu_file_nuovo();
     void menu_file_apri();
+    void menu_file_rinomina();
     void menu_file_salva();
     void menu_file_salvaTutto();
     void updateUI();
+    void updateUIanimation();
     void menu_altro_impostazioni();
     void menu_altro_info();
     void pulsante_aggiungiColonna();
-    void pulsante_aggiungiRiga();
     void pulsante_eliminaColonna();
-    void pulsante_eliminaRiga();
     void modificaCella();
 };
 

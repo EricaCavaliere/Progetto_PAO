@@ -88,6 +88,18 @@ void DatiGrafico::setTitolo(QString s){
     titolo = s;
 }
 
+void DatiGrafico::addLinea(DatiLinea& linea){
+    tabella.append(linea);
+}
+
+void DatiGrafico::removeLinea(){
+    tabella.pop_back();
+}
+
+void DatiGrafico::removeLinea(int indexLinea){
+    tabella.remove(indexLinea);
+}
+
 int DatiGrafico::count()const{
     return tabella.count();
 }
