@@ -9,6 +9,7 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    control/controller.cpp \
     main.cpp \
     view/datigrafico.cpp \
     view/mainwindow.cpp \
@@ -16,18 +17,17 @@ SOURCES += \
     model/sostanza.cpp \
     model/elemento.cpp \
     model/composto.cpp \
-    model/miscela.cpp \
-    view/modificatabella.cpp
+    model/miscela.cpp
 
 HEADERS += \
+    control/controller.h \
     view/datigrafico.h \
     view/mainwindow.h \
     model/campione.h \
     model/sostanza.h \
     model/elemento.h \
     model/composto.h \
-    model/miscela.h \
-    view/modificatabella.h
+    model/miscela.h
 
 
 # Default rules for deployment.

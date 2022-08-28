@@ -14,8 +14,7 @@
 #include <QPair>
 #include <QCoreApplication>
 #include <QInputDialog>
-#include <QTableWidget>
-
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent):QMainWindow(parent){
     setMinimumSize(800,500);
@@ -110,15 +109,6 @@ void MainWindow::impostaMenuBar(QMenuBar *menu){
     sopra->setChecked(true);
     connect(legenda,&QActionGroup::triggered,this,&MainWindow::updateUI);
     connect(animazione,&QAction::triggered,this,&MainWindow::updateUIanimation);
-
-    QMenu* altro = new QMenu("Altro",menu);
-    QAction* impostazioni = new QAction("Impostazioni",altro);
-    QAction* info = new QAction("Info",altro);
-    menu->addMenu(altro);
-    altro->addAction(impostazioni);
-    altro->addAction(info);
-    connect(impostazioni,&QAction::triggered,this,&MainWindow::menu_altro_impostazioni);
-    connect(info,&QAction::triggered,this,&MainWindow::menu_altro_info);
 }
 
 QSplitter* MainWindow::impostaGrafico(DatiGrafico* d, QWidget* parent){
@@ -292,26 +282,25 @@ QtCharts::QChartView* MainWindow::creaGraficoTorta(DatiGrafico* d){
     return view;
 }
 
-//DA COMPLETARE ------------------------------------------------------------------
 void MainWindow::menu_file_nuovo(){}
-//DA COMPLETARE ------------------------------------------------------------------
 void MainWindow::menu_file_apri(){}
+void MainWindow::menu_file_salva(){}
+void MainWindow::menu_file_salvaTutto(){}
 
 void MainWindow::menu_file_rinomina(){
     int index = tab->currentIndex();
-    QString s = QInputDialog::getText(this,tr("Rinomina"),tr("Inserire il titolo del grafico"));
-    if(!s.isNull() && s!=grafici.at(index)->chart()->title()){
-        status->showMessage(tr("Il grafico \"")+grafici.at(index)->chart()->title()+tr("\" è stato rinominato in \"")+s+"\"");
-        grafici.at(index)->chart()->setTitle(s);
-        window.at(index)->setTitolo(s);
-        tab->tabBar()->setTabText(index,s+tr("*"));
+    if(index>=0){
+        QString s = QInputDialog::getText(this,tr("Rinomina"),tr("Inserire il titolo del grafico"));
+        if(!s.isNull() && s!=grafici.at(index)->chart()->title()){
+            status->showMessage(tr("Il grafico \"")+grafici.at(index)->chart()->title()+tr("\" è stato rinominato in \"")+s+"\"");
+            grafici.at(index)->chart()->setTitle(s);
+            window.at(index)->setTitolo(s);
+            tab->tabBar()->setTabText(index,s+tr("*"));
+        }
+    }else{
+        QMessageBox::information(this,tr("Rinomina"),tr("Non ci sono grafici da rinominare."));
     }
 }
-
-//DA COMPLETARE ------------------------------------------------------------------
-void MainWindow::menu_file_salva(){}
-//DA COMPLETARE ------------------------------------------------------------------
-void MainWindow::menu_file_salvaTutto(){}
 
 void MainWindow::updateUI(){
     QAction* check = legenda->checkedAction();
@@ -355,11 +344,6 @@ void MainWindow::updateUIanimation(){
         }
     }
 }
-
-//DA COMPLETARE ------------------------------------------------------------------
-void MainWindow::menu_altro_impostazioni(){}
-//DA COMPLETARE ------------------------------------------------------------------
-void MainWindow::menu_altro_info(){}
 
 void MainWindow::pulsante_aggiungiColonna(){
     int index = tab->currentIndex();

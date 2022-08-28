@@ -38,16 +38,16 @@ private:
     QVector<QTableView*> tabelle;
     QVector<QtCharts::QChartView*> grafici;
 
+protected slots:
+    virtual void menu_file_nuovo();
+    virtual void menu_file_apri();
+    virtual void menu_file_salva();
+    virtual void menu_file_salvaTutto();
+
 private slots:
-    void menu_file_nuovo();
-    void menu_file_apri();
     void menu_file_rinomina();
-    void menu_file_salva();
-    void menu_file_salvaTutto();
     void updateUI();
     void updateUIanimation();
-    void menu_altro_impostazioni();
-    void menu_altro_info();
     void pulsante_aggiungiColonna();
     void pulsante_eliminaColonna();
     void modificaCella();

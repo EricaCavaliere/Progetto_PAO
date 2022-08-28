@@ -11,7 +11,7 @@ private:
 
 public:
     Sostanza(std::string="",Stato=indefinito, double=0.0, double=0.0, double=0.0,unsigned int=0);
-    Sostanza(const Sostanza& s); //se classe astratta, sostituire questo motodo con clone
+    Sostanza(const Sostanza& s);
     ~Sostanza();
 
     unsigned int getNMoli()const;

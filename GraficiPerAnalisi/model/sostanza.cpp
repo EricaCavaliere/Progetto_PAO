@@ -19,3 +19,11 @@ unsigned int Sostanza::getNMoli()const{
 double Sostanza::getMassaMolare()const{
     return massaMolare;
 }
+
+void Sostanza::setNMoli(unsigned int nm){
+    nMoli = nm;
+}
+
+void Sostanza::setMassaMolare(double m){
+    massaMolare = m;
+}
