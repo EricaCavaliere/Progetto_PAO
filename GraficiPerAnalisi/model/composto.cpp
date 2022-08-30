@@ -24,11 +24,11 @@ Elemento* Composto::iterator::operator->()const{
 }
 
 bool Composto::iterator::operator==(const iterator& i)const{
-    return *this==i;
+    return nodo==i.nodo && pastTheEnd==i.pastTheEnd;
 }
 
 bool Composto::iterator::operator!=(const iterator& i)const{
-    return *this!=i;
+    return nodo!=i.nodo && pastTheEnd!=i.pastTheEnd;
 }
 
 Composto::iterator& Composto::iterator::operator++(){
@@ -84,11 +84,11 @@ const Elemento* Composto::const_iterator::operator->()const{
 }
 
 bool Composto::const_iterator::operator==(const const_iterator& i)const{
-    return *this==i;
+    return nodo==i.nodo && pastTheEnd==i.pastTheEnd;
 }
 
 bool Composto::const_iterator::operator!=(const const_iterator& i)const{
-    return *this!=i;
+    return nodo!=i.nodo && pastTheEnd!=i.pastTheEnd;
 }
 
 Composto::const_iterator& Composto::const_iterator::operator++(){
@@ -230,7 +230,6 @@ bool Composto::empty()const{
     return first==nullptr;
 }
 
-//------------------------------- try-catch --------------------------------
 Elemento& Composto::operator[](unsigned int pos)const{
     if(pos<size()){
         Nodo* aux = first;
@@ -305,7 +304,6 @@ void Composto::pop_back(){
     }
 }
 
-//------------------------------- try-catch --------------------------------
 void Composto::erase(unsigned int pos){
     if(!empty() && pos<size()){
         Nodo* aux = first;
@@ -321,7 +319,6 @@ void Composto::erase(unsigned int pos){
     }else throw std::string("Fuori dalla lista");
 }
 
-//------------------------------- try-catch --------------------------------
 void Composto::erase(const iterator& i){
     if(!empty()){
         iterator it = begin();

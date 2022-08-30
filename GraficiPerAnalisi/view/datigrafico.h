@@ -15,7 +15,7 @@ class DatiGrafico
 public:
     enum TipoGrafico{linea=0,punti=1,torta=2};
 
-    DatiGrafico(int numP=0, int vMax=0, int numL=0,TipoGrafico=linea,QString="Grafico");
+    DatiGrafico(QString="Grafico",QString="Grafico",TipoGrafico=linea,int numP=0, int vMax=0, int numL=0);
     DatiGrafico(DatiGrafico&);
     ~DatiGrafico();
 
@@ -24,9 +24,10 @@ public:
     QString getNome(int indexLinea,int indexPunto)const;
     DatiPunto getPunto(int indexLinea,int indexPunto)const;
     DatiLinea getLinea(int indexLinea)const;
-    DatiTabella getTabella()const; //forse da eliminare... //forse no!
+    DatiTabella getTabella()const;
     TipoGrafico getTipo()const;
     QString getTitolo()const;
+    QString getIntestazione() const;
 
     void setPunto(int x,int y,int indexLinea,int indexPunto);
     void setPunto(QString n,int indexLinea,int indexPunto);
@@ -34,23 +35,24 @@ public:
     void setPunto(DatiPunto& d,int indexLinea,int indexPunto);
     void setLinea(QString nome, int indexLinea);
     void setLinea(DatiLinea& l,int indexLinea);
+    void setTipo(TipoGrafico);
     void setTitolo(QString);
+    void setIntestazione(QString);
 
     void addLinea(DatiLinea&);
     void removeLinea();
     void removeLinea(int indexLinea);
 
     int count()const;
-    int count(int indexLinea)const;
 
     DatiTabella generateRandomData(int,int,int) const;
 private:
+    QString titolo,intestazione;
+    TipoGrafico tipo;
     int nPunti;
     int valoreMax;
     int nLinee;
     DatiTabella tabella;
-    TipoGrafico tipo;
-    QString titolo;
 };
 
 #endif // DATIGRAFICO_H

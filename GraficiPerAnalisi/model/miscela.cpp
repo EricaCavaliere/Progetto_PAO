@@ -24,11 +24,11 @@ Composto* Miscela::iterator::operator->()const{
 }
 
 bool Miscela::iterator::operator==(const iterator& i)const{
-    return *this==i;
+    return nodo==i.nodo && pastTheEnd==i.pastTheEnd;
 }
 
 bool Miscela::iterator::operator!=(const iterator& i)const{
-    return *this!=i;
+    return nodo!=i.nodo && pastTheEnd!=i.pastTheEnd;
 }
 
 Miscela::iterator& Miscela::iterator::operator++(){
@@ -84,11 +84,11 @@ const Composto* Miscela::const_iterator::operator->()const{
 }
 
 bool Miscela::const_iterator::operator==(const const_iterator& i)const{
-    return *this==i;
+    return nodo==i.nodo && pastTheEnd==i.pastTheEnd;
 }
 
 bool Miscela::const_iterator::operator!=(const const_iterator& i)const{
-    return *this!=i;
+    return nodo!=i.nodo && pastTheEnd!=i.pastTheEnd;
 }
 
 Miscela::const_iterator& Miscela::const_iterator::operator++(){

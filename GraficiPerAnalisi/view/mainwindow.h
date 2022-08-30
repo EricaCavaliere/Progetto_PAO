@@ -20,6 +20,9 @@ public:
 
     void aggiungiGrafico(DatiGrafico*);
 
+protected:
+    QVector<DatiGrafico*> window;
+
 private:
     void impostaMenuBar(QMenuBar*);
     QSplitter* impostaGrafico(DatiGrafico*,QWidget*);
@@ -32,9 +35,7 @@ private:
     QActionGroup* legenda;
     QAction* animazione;
     QTabWidget *tab;
-    QStatusBar *status;
 
-    QVector<DatiGrafico*> window;
     QVector<QTableView*> tabelle;
     QVector<QtCharts::QChartView*> grafici;
 
@@ -42,7 +43,6 @@ protected slots:
     virtual void menu_file_nuovo();
     virtual void menu_file_apri();
     virtual void menu_file_salva();
-    virtual void menu_file_salvaTutto();
 
 private slots:
     void menu_file_rinomina();
@@ -50,6 +50,8 @@ private slots:
     void updateUIanimation();
     void pulsante_aggiungiColonna();
     void pulsante_eliminaColonna();
+    void pulsante_aggiungiRiga();
+    void pulsante_eliminaRiga();
     void modificaCella();
 };
 
