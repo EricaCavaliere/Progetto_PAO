@@ -15,7 +15,7 @@ class DatiGrafico
 public:
     enum TipoGrafico{linea=0,punti=1,torta=2};
 
-    DatiGrafico(QString="Grafico",QString="Grafico",TipoGrafico=linea,int numP=0, int vMax=0, int numL=0);
+    DatiGrafico(QString="Grafico",QString="Grafico",TipoGrafico=linea,int numP=10, int vMax=20, int numL=1);
     DatiGrafico(DatiGrafico&);
     ~DatiGrafico();
 

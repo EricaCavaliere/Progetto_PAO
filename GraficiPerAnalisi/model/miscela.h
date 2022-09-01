@@ -62,7 +62,7 @@ public:
     Miscela& operator=(const Miscela&);
     ~Miscela();
 
-    bool getSoluzione()const;
+    bool isSoluzione()const;
     void setSoluzione(bool);
 
     double massaSoluto(const Composto&)const;

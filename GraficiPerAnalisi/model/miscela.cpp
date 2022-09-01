@@ -24,43 +24,52 @@ Composto* Miscela::iterator::operator->()const{
 }
 
 bool Miscela::iterator::operator==(const iterator& i)const{
-    return nodo==i.nodo && pastTheEnd==i.pastTheEnd;
+    return nodo==i.nodo;
 }
 
 bool Miscela::iterator::operator!=(const iterator& i)const{
-    return nodo!=i.nodo && pastTheEnd!=i.pastTheEnd;
+    return nodo!=i.nodo;
 }
 
 Miscela::iterator& Miscela::iterator::operator++(){
-    if(nodo != nullptr){
-        if(nodo->next != nullptr) nodo = nodo->next;
-        else pastTheEnd = true;
+    if(nodo!=nullptr && !pastTheEnd){
+        if(nodo->next == nullptr){
+            nodo+=1;
+            pastTheEnd = true;
+        }
+        else nodo = nodo->next;
     }
     return *this;
 }
 
 Miscela::iterator Miscela::iterator::operator++(int){
     iterator aux(*this);
-    if(nodo != nullptr){
-        if(nodo->next != nullptr) nodo = nodo->next;
-        else pastTheEnd = true;
+    if(nodo!=nullptr && !pastTheEnd){
+        if(nodo->next == nullptr){
+            nodo+=1;
+            pastTheEnd = true;
+        }else nodo = nodo->next;
     }
     return aux;
 }
 
 Miscela::iterator& Miscela::iterator::operator--(){
-    if(nodo != nullptr){
-        if(nodo->prev != nullptr) nodo = nodo->prev;
-        else pastTheEnd = false;
+    if(nodo!=nullptr){
+        if(pastTheEnd){
+            nodo-=1;
+            pastTheEnd = false;
+        }else nodo = nodo->prev;
     }
     return *this;
 }
 
 Miscela::iterator Miscela::iterator::operator--(int){
     iterator aux = *this;
-    if(nodo != nullptr){
-        if(nodo->prev != nullptr) nodo = nodo->prev;
-        else pastTheEnd = false;
+    if(nodo!=nullptr){
+        if(pastTheEnd){
+            nodo-=1;
+            pastTheEnd = false;
+        }else nodo = nodo->prev;
     }
     return aux;
 }
@@ -84,34 +93,41 @@ const Composto* Miscela::const_iterator::operator->()const{
 }
 
 bool Miscela::const_iterator::operator==(const const_iterator& i)const{
-    return nodo==i.nodo && pastTheEnd==i.pastTheEnd;
+    return nodo==i.nodo;
 }
 
 bool Miscela::const_iterator::operator!=(const const_iterator& i)const{
-    return nodo!=i.nodo && pastTheEnd!=i.pastTheEnd;
+    return nodo!=i.nodo;
 }
 
 Miscela::const_iterator& Miscela::const_iterator::operator++(){
-    if(nodo!=nullptr){
-        if(nodo->next != nullptr) nodo = nodo->next;
-        else pastTheEnd = true;
+    if(nodo!=nullptr && !pastTheEnd){
+        if(nodo->next == nullptr){
+            nodo+=1;
+            pastTheEnd = true;
+        }
+        else nodo = nodo->next;
     }
     return *this;
 }
 
 Miscela::const_iterator Miscela::const_iterator::operator++(int){
     const_iterator aux = *this;
-    if(nodo!=nullptr){
-        if(nodo->next != nullptr) nodo = nodo->next;
-        else pastTheEnd = true;
+    if(nodo!=nullptr && !pastTheEnd){
+        if(nodo->next == nullptr){
+            nodo+=1;
+            pastTheEnd = true;
+        }else nodo = nodo->next;
     }
     return aux;
 }
 
 Miscela::const_iterator& Miscela::const_iterator::operator--(){
     if(nodo!=nullptr){
-        if(nodo->prev != nullptr) nodo = nodo->prev;
-        else pastTheEnd = false;
+        if(pastTheEnd){
+            nodo-=1;
+            pastTheEnd = false;
+        }else nodo = nodo->prev;
     }
     return *this;
 }
@@ -119,8 +135,10 @@ Miscela::const_iterator& Miscela::const_iterator::operator--(){
 Miscela::const_iterator Miscela::const_iterator::operator--(int){
     const_iterator aux(*this);
     if(nodo!=nullptr){
-        if(nodo->prev != nullptr) nodo = nodo->prev;
-        else pastTheEnd = false;
+        if(pastTheEnd){
+            nodo-=1;
+            pastTheEnd = false;
+        }else nodo = nodo->prev;
     }
     return aux;
 }
@@ -168,7 +186,7 @@ Miscela::~Miscela(){
     if(first!=nullptr) distruggi(first);
 }
 
-bool Miscela::getSoluzione()const{
+bool Miscela::isSoluzione()const{
     return soluzione;
 }
 
@@ -176,7 +194,6 @@ void Miscela::setSoluzione(bool s){
     soluzione = s;
 }
 
-//------------------------------- try-catch --------------------------------
 double Miscela::massaSoluto(const Composto& c)const{
     if(!soluzione) throw std::string("Non è una soluzione");
     Nodo* aux = first;
@@ -189,7 +206,6 @@ double Miscela::massaSoluto(const Composto& c)const{
     return massaSoluto;
 }
 
-//------------------------------- try-catch --------------------------------
 double Miscela::volumeSoluto(const Composto& c)const{
     if(!soluzione) throw std::string("Non è una soluzione");
     Nodo* aux = first;
@@ -202,7 +218,6 @@ double Miscela::volumeSoluto(const Composto& c)const{
     return volumeSoluto;
 }
 
-//------------------------------- try-catch --------------------------------
 double Miscela::moliSoluto(const Composto & c) const{
     if(!soluzione) throw std::string("Non è una soluzione");
     Nodo* aux = first;
@@ -215,28 +230,24 @@ double Miscela::moliSoluto(const Composto & c) const{
     return moliSoluto;
 }
 
-//------------------------------- try-catch --------------------------------
 double Miscela::percentualeMassa(const Composto& c)const{
     if(!soluzione) throw std::string("Non è una soluzione");
     if(getMassa()==0.0) return 0.0;
     return (massaSoluto(c)/getMassa())*100;
 }
 
-//------------------------------- try-catch --------------------------------
 double Miscela::percentualeVolume(const Composto& c)const{
     if(!soluzione) throw std::string("Non è una soluzione");
     if(getVolume()==0.0) return 0.0;
     return (volumeSoluto(c)/getVolume())*100;
 }
 
-//------------------------------- try-catch --------------------------------
 double Miscela::massaSuVolume(const Composto& c)const{
     if(!soluzione) throw std::string("Non è una soluzione");
     if(getVolume()==0.0) return 0.0;
     return (massaSoluto(c)/getVolume())*100;
 }
 
-//------------------------------- try-catch --------------------------------
 double Miscela::molarita(const Composto& c)const{
     if(!soluzione) throw std::string("Non è una soluzione");
     if(getVolume()==0.0) return 0.0;
@@ -257,7 +268,6 @@ bool Miscela::empty()const{
     return first==nullptr;
 }
 
-//------------------------------- try-catch --------------------------------
 Composto& Miscela::operator[](unsigned int pos)const{
     if(pos<size()){
         Nodo* aux = first;
@@ -267,19 +277,21 @@ Composto& Miscela::operator[](unsigned int pos)const{
 }
 
 Miscela::iterator Miscela::begin(){
-    return iterator(first,false);
+    return iterator(first);
 }
 
 Miscela::iterator Miscela::end(){
-    return iterator(last,true);
+    if(first==nullptr) return iterator(nullptr,false);
+    return iterator(last+1,true);
 }
 
 Miscela::const_iterator Miscela::begin()const{
-    return const_iterator(first,false);
+    return const_iterator(first);
 }
 
 Miscela::const_iterator Miscela::end()const{
-    return const_iterator(last,true);
+    if(first==nullptr) return const_iterator(nullptr,false);
+    return const_iterator(last+1,true);
 }
 
 void Miscela::push_front(const Composto& e){
@@ -332,7 +344,6 @@ void Miscela::pop_back(){
     }
 }
 
-//------------------------------- try-catch --------------------------------
 void Miscela::erase(unsigned int pos){
     if(!empty() && pos<size()){
         Nodo* aux = first;
@@ -348,7 +359,6 @@ void Miscela::erase(unsigned int pos){
     }else throw std::string("Fuori dalla lista");
 }
 
-//------------------------------- try-catch --------------------------------
 void Miscela::erase(const iterator& i){
     if(!empty()){
         iterator it = begin();

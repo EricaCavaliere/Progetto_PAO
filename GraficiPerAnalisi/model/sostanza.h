@@ -18,7 +18,7 @@ public:
     double getMassaMolare()const;
 
     void setNMoli(unsigned int);
-    void setMassaMolare(double);
+    virtual void setMassa(double);
 
 };
 

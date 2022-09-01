@@ -19,11 +19,11 @@ public:
     double getVolume()const;
     double getTemperatura()const;
 
-    void setNome(std::string);
-    void setMateria(Stato);
-    void setMassa(double);
-    void setVolume(double);
-    void setTemperatura(double);
+    virtual void setNome(std::string);
+    virtual void setMateria(Stato);
+    virtual void setMassa(double);
+    virtual void setVolume(double);
+    virtual void setTemperatura(double);
 
 private:
     std::string nome;

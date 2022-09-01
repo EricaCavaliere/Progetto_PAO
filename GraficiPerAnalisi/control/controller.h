@@ -1,26 +1,38 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-#include "view/mainwindow.h"
+#include "model/campione.h"
 #include "model/elemento.h"
 #include "model/composto.h"
+#include "model/miscela.h"
+#include "view/mainwindow.h"
 
-#include <vector>
+#include <QString>
 
-class Controller:public MainWindow
+typedef QPair<Campione,QString> Path;
+
+class Controller
 {
+    Q_OBJECT
 public:
-    Controller();
+    explicit Controller(MainWindow*);
+    ~Controller();
 private:
+    MainWindow* view;
+    QVector<Path> model;//dati e percorso cartella
     Elemento inserire_elemento();
+    Campione::Stato lettura_stato(QString);
     Composto lettura_composto(QFile*);
+    Miscela lettura_miscela(QFile*);
 private slots:
-    void menu_file_nuovo() override;
-    void menu_file_apri() override;
-    void menu_file_salva() override;
-
-    void nuovo_elemento_Aggiorna();
-    void nuovo_elemento_Annulla();
+    void nuovo_file();
+    void apri_file();
+    void salva_file(QVector<DatiGrafico*>);
+    //void menu_file_nuovo();
+    //void menu_file_apri();
+    //void menu_file_salva();
+    //void nuovo_elemento_Aggiorna();
+    //void nuovo_elemento_Annulla();
 };
 
 #endif // CONTROLLER_H

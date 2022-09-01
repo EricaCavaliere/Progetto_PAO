@@ -24,43 +24,52 @@ Elemento* Composto::iterator::operator->()const{
 }
 
 bool Composto::iterator::operator==(const iterator& i)const{
-    return nodo==i.nodo && pastTheEnd==i.pastTheEnd;
+    return nodo==i.nodo;
 }
 
 bool Composto::iterator::operator!=(const iterator& i)const{
-    return nodo!=i.nodo && pastTheEnd!=i.pastTheEnd;
+    return nodo!=i.nodo;
 }
 
 Composto::iterator& Composto::iterator::operator++(){
-    if(nodo != nullptr){
-        if(nodo->next != nullptr) nodo = nodo->next;
-        else pastTheEnd = true;
+    if(nodo!=nullptr && !pastTheEnd){
+        if(nodo->next == nullptr){
+            nodo+=1;
+            pastTheEnd = true;
+        }
+        else nodo = nodo->next;
     }
     return *this;
 }
 
 Composto::iterator Composto::iterator::operator++(int){
     iterator aux(*this);
-    if(nodo != nullptr){
-        if(nodo->next != nullptr) nodo = nodo->next;
-        else pastTheEnd = true;
+    if(nodo!=nullptr && !pastTheEnd){
+        if(nodo->next == nullptr){
+            nodo+=1;
+            pastTheEnd = true;
+        }else nodo = nodo->next;
     }
     return aux;
 }
 
 Composto::iterator& Composto::iterator::operator--(){
-    if(nodo != nullptr){
-        if(nodo->prev != nullptr) nodo = nodo->prev;
-        else pastTheEnd = false;
+    if(nodo!=nullptr){
+        if(pastTheEnd){
+            nodo-=1;
+            pastTheEnd = false;
+        }else nodo = nodo->prev;
     }
     return *this;
 }
 
 Composto::iterator Composto::iterator::operator--(int){
     iterator aux = *this;
-    if(nodo != nullptr){
-        if(nodo->prev != nullptr) nodo = nodo->prev;
-        else pastTheEnd = false;
+    if(nodo!=nullptr){
+        if(pastTheEnd){
+            nodo-=1;
+            pastTheEnd = false;
+        }else nodo = nodo->prev;
     }
     return aux;
 }
@@ -73,6 +82,7 @@ Composto::const_iterator::const_iterator(Nodo* n,bool pte):nodo(n),pastTheEnd(pt
 
 Composto::const_iterator::const_iterator():nodo(nullptr),pastTheEnd(false){}
 
+//questo non c'e'
 Composto::const_iterator::const_iterator(const const_iterator& i):nodo(i.nodo),pastTheEnd(i.pastTheEnd){}
 
 const Elemento& Composto::const_iterator::operator*()const{
@@ -84,34 +94,41 @@ const Elemento* Composto::const_iterator::operator->()const{
 }
 
 bool Composto::const_iterator::operator==(const const_iterator& i)const{
-    return nodo==i.nodo && pastTheEnd==i.pastTheEnd;
+    return nodo==i.nodo;
 }
 
 bool Composto::const_iterator::operator!=(const const_iterator& i)const{
-    return nodo!=i.nodo && pastTheEnd!=i.pastTheEnd;
+    return nodo!=i.nodo;
 }
 
 Composto::const_iterator& Composto::const_iterator::operator++(){
-    if(nodo!=nullptr){
-        if(nodo->next != nullptr) nodo = nodo->next;
-        else pastTheEnd = true;
+    if(nodo!=nullptr && !pastTheEnd){
+        if(nodo->next == nullptr){
+            nodo+=1;
+            pastTheEnd = true;
+        }
+        else nodo = nodo->next;
     }
     return *this;
 }
 
 Composto::const_iterator Composto::const_iterator::operator++(int){
     const_iterator aux = *this;
-    if(nodo!=nullptr){
-        if(nodo->next != nullptr) nodo = nodo->next;
-        else pastTheEnd = true;
+    if(nodo!=nullptr && !pastTheEnd){
+        if(nodo->next == nullptr){
+            nodo+=1;
+            pastTheEnd = true;
+        }else nodo = nodo->next;
     }
     return aux;
 }
 
 Composto::const_iterator& Composto::const_iterator::operator--(){
     if(nodo!=nullptr){
-        if(nodo->prev != nullptr) nodo = nodo->prev;
-        else pastTheEnd = false;
+        if(pastTheEnd){
+            nodo-=1;
+            pastTheEnd = false;
+        }else nodo = nodo->prev;
     }
     return *this;
 }
@@ -119,8 +136,10 @@ Composto::const_iterator& Composto::const_iterator::operator--(){
 Composto::const_iterator Composto::const_iterator::operator--(int){
     const_iterator aux(*this);
     if(nodo!=nullptr){
-        if(nodo->prev != nullptr) nodo = nodo->prev;
-        else pastTheEnd = false;
+        if(pastTheEnd){
+            nodo-=1;
+            pastTheEnd = false;
+        }else nodo = nodo->prev;
     }
     return aux;
 }
@@ -239,19 +258,21 @@ Elemento& Composto::operator[](unsigned int pos)const{
 }
 
 Composto::iterator Composto::begin(){
-    return iterator(first,false);
+    return iterator(first);
 }
 
 Composto::iterator Composto::end(){
-    return iterator(last,true);
+    if(first==nullptr) return iterator(nullptr,false);
+    return iterator(last+1,true);
 }
 
 Composto::const_iterator Composto::begin()const{
-    return const_iterator(first,false);
+    return const_iterator(first);
 }
 
 Composto::const_iterator Composto::end()const{
-    return const_iterator(last,true);
+    if(first==nullptr) return const_iterator(nullptr,false);
+    return const_iterator(last+1,true);
 }
 
 void Composto::push_front(const Elemento& e){
