@@ -3,7 +3,7 @@
 
 #include "campione.h"
 
-class Sostanza: virtual public Campione
+class Sostanza: public Campione
 {
 private:
     unsigned int nMoli;

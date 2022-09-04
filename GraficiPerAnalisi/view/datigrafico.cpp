@@ -2,14 +2,15 @@
 
 #include <QTime>
 
-DatiGrafico::DatiGrafico(QString s,QString i,TipoGrafico t,int numP, int vMax, int numL)
-    :titolo(s),intestazione(i),tipo(t),nPunti(numP),valoreMax(vMax),nLinee(numL),tabella(generateRandomData(nLinee,valoreMax,nPunti)){}
+DatiGrafico::DatiGrafico(QString s,QString i,TipoGrafico t,int nPunti, int valoreMax, int nLinee)
+    :tabella(generateRandomData(nLinee,valoreMax,nPunti)),titolo(s),intestazione(i),tipo(t){}
 
-DatiGrafico::DatiGrafico(DatiGrafico &d)
-    :titolo(d.titolo),intestazione(d.intestazione),tipo(d.tipo),nPunti(d.nPunti),valoreMax(d.valoreMax),nLinee(d.nLinee),tabella(d.tabella){}
+DatiGrafico::DatiGrafico(const DatiGrafico &d)
+    :tabella(d.tabella),titolo(d.titolo),intestazione(d.intestazione),tipo(d.tipo){}
 
 DatiGrafico::~DatiGrafico(){}
 
+/*
 int DatiGrafico::getX(int indexLinea,int indexPunto)const{
     return tabella.at(indexLinea).at(indexPunto).first.x();
 }
@@ -29,10 +30,17 @@ DatiPunto DatiGrafico::getPunto(int indexLinea,int indexPunto)const{
 DatiLinea DatiGrafico::getLinea(int indexLinea)const{
     return tabella.at(indexLinea);
 }
+*/
 
-DatiTabella DatiGrafico::getTabella()const{
+/*
+DatiTabella DatiGrafico::Tabella() const{
     return tabella;
 }
+
+DatiTabella DatiGrafico::modifica(){
+    return tabella;
+}
+*/
 
 DatiGrafico::TipoGrafico DatiGrafico::getTipo()const{
     return tipo;
@@ -45,7 +53,7 @@ QString DatiGrafico::getTitolo()const{
 QString DatiGrafico::getIntestazione()const{
     return intestazione;
 }
-
+/*
 void DatiGrafico::setPunto(int x,int y,int indexLinea,int indexPunto){
     if(indexLinea<tabella.count())
         if(indexPunto<tabella.at(indexLinea).count()){
@@ -87,7 +95,7 @@ void DatiGrafico::setLinea(DatiLinea& l,int indexLinea){
             for(int i=0;i<tabella.at(indexLinea).count();++i)
                 tabella[indexLinea][i] = l.at(i);
 }
-
+*/
 void DatiGrafico::setTipo(TipoGrafico t){
     tipo = t;
 }
@@ -98,22 +106,6 @@ void DatiGrafico::setTitolo(QString s){
 
 void DatiGrafico::setIntestazione(QString i){
     intestazione = i;
-}
-
-void DatiGrafico::addLinea(DatiLinea& linea){
-    tabella.append(linea);
-}
-
-void DatiGrafico::removeLinea(){
-    tabella.pop_back();
-}
-
-void DatiGrafico::removeLinea(int indexLinea){
-    tabella.remove(indexLinea);
-}
-
-int DatiGrafico::count()const{
-    return tabella.count();
 }
 
 DatiTabella DatiGrafico::generateRandomData(int listCount, int valueMax, int valueCount) const{
@@ -128,7 +120,7 @@ DatiTabella DatiGrafico::generateRandomData(int listCount, int valueMax, int val
         qreal yValue(0);
         for (int j(0); j < valueCount; j++) {
             yValue = yValue + (qreal)(qrand() % valueMax) / (qreal) valueCount;
-            QPointF value((j + (qreal) rand() / (qreal) RAND_MAX) * ((qreal) valoreMax / (qreal) valueCount)
+            QPointF value((j + (qreal) rand() / (qreal) RAND_MAX) * ((qreal) valueMax / (qreal) valueCount)
                           ,yValue);
             QString label = "Slice " + QString::number(i) + ":" + QString::number(j);
             dataList << DatiPunto(value, label);

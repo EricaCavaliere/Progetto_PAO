@@ -9,30 +9,44 @@
 
 #include <QString>
 
-typedef QPair<Campione,QString> Path;
+typedef QPair<Campione*,QString> Path;
 
-class Controller
+class Controller: public QWidget
 {
     Q_OBJECT
 public:
-    explicit Controller(MainWindow*);
+    explicit Controller(QWidget* = 0);
     ~Controller();
 private:
     MainWindow* view;
-    QVector<Path> model;//dati e percorso cartella
-    Elemento inserire_elemento();
-    Campione::Stato lettura_stato(QString);
-    Composto lettura_composto(QFile*);
-    Miscela lettura_miscela(QFile*);
-private slots:
+    QVector<Path> model;
+
+    bool isFileOpenRead(QFile&);
+    bool isFileOpenWrite(QFile&);
+    void insertInModel(Campione*, QString);
+    void viewTable(QAbstractItemModel*);
+    Campione::Stato fromStringToStato(QString);
+    QString fromStatoToString(Campione::Stato);
+    DatiGrafico::TipoGrafico fromStringToGrafico(QString);
+    QString fromGraficoToString(DatiGrafico::TipoGrafico);
+
+    Elemento crea_elemento();
+    Composto crea_composto();
+    Miscela crea_miscela();
+
+    Composto lettura_composto(QJsonDocument&); //
+    Miscela lettura_miscela(QJsonDocument&); //
+    DatiGrafico lettura_grafico(QJsonDocument&);//
+
+    void salva_composto_json(QJsonObject&,Composto*,const DatiGrafico&);
+    void salva_miscela_json(QJsonObject&,Miscela*,const DatiGrafico&);
+    void imposta_tabella_json(QJsonObject&,const DatiGrafico &);
+
+public slots:
     void nuovo_file();
     void apri_file();
-    void salva_file(QVector<DatiGrafico*>);
-    //void menu_file_nuovo();
-    //void menu_file_apri();
-    //void menu_file_salva();
-    //void nuovo_elemento_Aggiorna();
-    //void nuovo_elemento_Annulla();
+    void salva_file(const QVector<DatiGrafico>&);
+
 };
 
 #endif // CONTROLLER_H

@@ -2,7 +2,7 @@
 
 Elemento::Elemento(std::string s, int na, double nm):nome(s),numAtomico(na),numMassa(nm){}
 
-Elemento::Elemento(const Elemento& e):numAtomico(e.numAtomico),numMassa(e.numMassa){}
+Elemento::Elemento(const Elemento& e):nome(e.nome),numAtomico(e.numAtomico),numMassa(e.numMassa){}
 
 Elemento::~Elemento(){}
 

@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-#include "modificatabella.h"
 
 #include <QMenuBar>
 #include <QStatusBar>
@@ -28,25 +27,12 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent){
     setCentralWidget(tab);
 }
 
-MainWindow::MainWindow(DatiGrafico *d,QWidget *parent):QMainWindow(parent){
-    window.push_back(d);
-
-    setMinimumSize(800,500);
-    QMenuBar* menu = new QMenuBar(this);
-    impostaMenuBar(menu);
-    setMenuBar(menu);
-
-    tab = new QTabWidget(this);
-    tab->addTab(impostaGrafico(d,tab),d->getTitolo());
-    tab->setMovable(true);
-    setCentralWidget(tab);
-}
-
 MainWindow::~MainWindow(){}
 
-void MainWindow::aggiungiGrafico(DatiGrafico* d){
-    window.push_back(d);
-    tab->addTab(impostaGrafico(d,tab),d->getIntestazione());
+void MainWindow::aggiungiGrafico(const DatiGrafico &d){
+    DatiGrafico dati(d);
+    window.push_back(dati);
+    tab->addTab(impostaGrafico(d,tab),d.getIntestazione());
 }
 
 void MainWindow::impostaMenuBar(QMenuBar *menu){
@@ -99,14 +85,14 @@ void MainWindow::impostaMenuBar(QMenuBar *menu){
     connect(animazione,&QAction::triggered,this,&MainWindow::updateUIanimation);
 }
 
-QSplitter* MainWindow::impostaGrafico(DatiGrafico* d, QWidget* parent){
+QSplitter* MainWindow::impostaGrafico(const DatiGrafico &d, QWidget* parent){
     QSplitter *s = new QSplitter;
     s->addWidget(baseTabella(d,parent));
-    if(d->getTipo()==DatiGrafico::TipoGrafico::linea)
+    if(d.getTipo()==DatiGrafico::TipoGrafico::linea)
         s->addWidget(creaGraficoLinea(d));
-    else if(d->getTipo()==DatiGrafico::TipoGrafico::punti)
+    else if(d.getTipo()==DatiGrafico::TipoGrafico::punti)
         s->addWidget(creaGraficoPunti(d));
-    else if(d->getTipo()==DatiGrafico::TipoGrafico::torta)
+    else if(d.getTipo()==DatiGrafico::TipoGrafico::torta)
         s->addWidget(creaGraficoTorta(d));
 
     s->setStretchFactor(1, 1);
@@ -114,7 +100,7 @@ QSplitter* MainWindow::impostaGrafico(DatiGrafico* d, QWidget* parent){
     return s;
 }
 
-QWidget* MainWindow::baseTabella(DatiGrafico* d,QWidget* parent){
+QWidget* MainWindow::baseTabella(const DatiGrafico &d, QWidget* parent){
     QWidget* obj = new QWidget(parent);
     QVBoxLayout *layoutObj = new QVBoxLayout(obj);
 
@@ -135,57 +121,57 @@ QWidget* MainWindow::baseTabella(DatiGrafico* d,QWidget* parent){
     return obj;
 }
 
-QTableView* MainWindow::creaTabella(DatiGrafico* d, QWidget *parent){
+QTableView* MainWindow::creaTabella(const DatiGrafico &d, QWidget *parent){
     QAbstractItemModel *model;
-    if(d->count()>0)
-        model = new QStandardItemModel(d->getLinea(0).count(),d->count()*2,parent);
+    if(d.tabella.count()>0)
+        model = new QStandardItemModel(d.tabella.at(0).count(),d.tabella.count()*2,parent);
     else
-        model = new QStandardItemModel(0,d->count()*2);
+        model = new QStandardItemModel(0,d.tabella.count()*2);
 
-    if(d->getTipo()==DatiGrafico::TipoGrafico::linea || d->getTipo()==DatiGrafico::TipoGrafico::punti){
+    if(d.getTipo()==DatiGrafico::TipoGrafico::linea || d.getTipo()==DatiGrafico::TipoGrafico::punti){
         QString nome;
-        for(int i=0;i<d->count();++i){
+        for(int i=0;i<d.tabella.count();++i){
             nome = tr("x - Serie")+QString::number(i+1);
             model->setHeaderData(i*2,Qt::Horizontal,nome);
             nome = tr("y - Serie")+QString::number(i+1);
             model->setHeaderData(i*2+1,Qt::Horizontal,nome);
         }
-        if(d->count()>0){
+        if(d.tabella.count()>0){
             QModelIndex index;
             QVariant value;
-            for(int i=0;i<d->getLinea(0).count();++i){
-                for(int j=0;j<d->count();++j){
+            for(int i=0;i<d.tabella.at(0).count();++i){
+                for(int j=0;j<d.tabella.count();++j){
                     //x
                     index = model->index(i,j*2);
-                    value = d->getPunto(j,i).first.x();
+                    value = d.tabella.at(j).at(i).first.x();
                     model->setData(index,value);
                     //y
                     index = model->index(i,j*2+1);
-                    value = d->getPunto(j,i).first.y();
+                    value = d.tabella.at(j).at(i).first.y();
                     model->setData(index,value);
                 }
             }
         }
-    }else if(d->getTipo()==DatiGrafico::TipoGrafico::torta){
+    }else if(d.getTipo()==DatiGrafico::TipoGrafico::torta){
         QString nome;
-        for(int i=0;i<d->count();++i){
+        for(int i=0;i<d.tabella.count();++i){
             nome = tr("Torta ")+QString::number(i+1)+tr(" - fette");
             model->setHeaderData(i*2,Qt::Horizontal,nome);
             nome = tr("Torta ")+QString::number(i+1)+tr(" - dati");
             model->setHeaderData(i*2+1,Qt::Horizontal,nome);
         }
-        if(d->count()>0){
+        if(d.tabella.count()>0){
             QModelIndex index;
             QVariant value;
-            for(int i=0;i<d->getLinea(0).count();++i){
-                for(int j=0;j<d->count();++j){
+            for(int i=0;i<d.tabella.at(0).count();++i){
+                for(int j=0;j<d.tabella.count();++j){
                     //nome
                     index = model->index(i,j*2);
-                    value = d->getPunto(j,i).second;
+                    value = d.tabella.at(j).at(i).second;
                     model->setData(index,value);
                     //dato (y)
                     index = model->index(i,j*2+1);
-                    value = d->getPunto(j,i).first.y();
+                    value = d.tabella.at(j).at(i).first.y();
                     model->setData(index,value);
                 }
             }
@@ -201,11 +187,11 @@ QTableView* MainWindow::creaTabella(DatiGrafico* d, QWidget *parent){
 }
 
 
-QtCharts::QChartView* MainWindow::creaGraficoLinea(DatiGrafico* d){
+QtCharts::QChartView* MainWindow::creaGraficoLinea(const DatiGrafico &d){
     QtCharts::QChart *chart = new QtCharts::QChart();
-    chart->setTitle(d->getTitolo());
+    chart->setTitle(d.getTitolo());
     int nameIndex = 1;
-    for(const DatiLinea &linea : d->getTabella()){
+    for(const DatiLinea &linea : d.tabella){
         QtCharts::QLineSeries *series = new QtCharts::QLineSeries(chart);
         for(const DatiPunto &punto : linea)
             series->append(punto.first);
@@ -220,12 +206,11 @@ QtCharts::QChartView* MainWindow::creaGraficoLinea(DatiGrafico* d){
     return view;
 }
 
-QtCharts::QChartView* MainWindow::creaGraficoPunti(DatiGrafico* d){
-    // scatter chart
+QtCharts::QChartView* MainWindow::creaGraficoPunti(const DatiGrafico &d){
     QtCharts::QChart *chart = new QtCharts::QChart();
-    chart->setTitle(d->getTitolo());
+    chart->setTitle(d.getTitolo());
     int nameIndex = 1;
-    for (const DatiLinea &list : d->getTabella()) {
+    for (const DatiLinea &list : d.tabella) {
         QtCharts::QScatterSeries *series = new QtCharts::QScatterSeries(chart);
         for (const DatiPunto &data : list)
             series->append(data.first);
@@ -240,17 +225,17 @@ QtCharts::QChartView* MainWindow::creaGraficoPunti(DatiGrafico* d){
     return view;
 }
 
-QtCharts::QChartView* MainWindow::creaGraficoTorta(DatiGrafico* d){
+QtCharts::QChartView* MainWindow::creaGraficoTorta(const DatiGrafico &d){
     QtCharts::QChart *chart = new QtCharts::QChart();
-    chart->setTitle(d->getTitolo());
-    qreal pieSize = 1.0 / d->count();
-    for (int i = 0; i < d->count(); i++) {
+    chart->setTitle(d.getTitolo());
+    qreal pieSize = 1.0 / d.tabella.count();
+    for (int i = 0; i < d.tabella.count(); i++) {
         QtCharts::QPieSeries *series = new QtCharts::QPieSeries(chart);
-        for (const DatiPunto &data : d->getTabella().at(i)) {
+        for (const DatiPunto &data : d.tabella.at(i)) {
             QtCharts::QPieSlice *slice = series->append(data.second, data.first.y());
             slice->setLabelVisible();
         }
-        qreal hPos = (pieSize / 2) + (i / (qreal) d->count());
+        qreal hPos = (pieSize / 2) + (i / (qreal) d.tabella.count());
         series->setPieSize(pieSize);
         series->setHorizontalPosition(hPos);
         series->setVerticalPosition(0.5);
@@ -265,10 +250,10 @@ QtCharts::QChartView* MainWindow::creaGraficoTorta(DatiGrafico* d){
 
 QtCharts::QChart* MainWindow::aggiornaGraficoLinea(int index){
     QtCharts::QChart *chart = new QtCharts::QChart();
-    chart->setTitle(window.at(index)->getTitolo());
+    chart->setTitle(window.at(index).getTitolo());
     QString name("Series ");
     int nameIndex = 0;
-    for(const DatiLinea &linea : window.at(index)->getTabella()){
+    for(const DatiLinea &linea : window[index].tabella){
         QtCharts::QLineSeries *series = new QtCharts::QLineSeries(chart);
         for(const DatiPunto &punto : linea)
             series->append(punto.first);
@@ -281,10 +266,10 @@ QtCharts::QChart* MainWindow::aggiornaGraficoLinea(int index){
 }
 QtCharts::QChart* MainWindow::aggiornaGraficoPunti(int index){
     QtCharts::QChart *chart = new QtCharts::QChart();
-    chart->setTitle(window.at(index)->getTitolo());
+    chart->setTitle(window.at(index).getTitolo());
     QString name("Series ");
     int nameIndex = 0;
-    for (const DatiLinea &list : window.at(index)->getTabella()) {
+    for (const DatiLinea &list : window[index].tabella) {
         QtCharts::QScatterSeries *series = new QtCharts::QScatterSeries(chart);
         for (const DatiPunto &data : list)
             series->append(data.first);
@@ -297,15 +282,15 @@ QtCharts::QChart* MainWindow::aggiornaGraficoPunti(int index){
 }
 QtCharts::QChart* MainWindow::aggiornaGraficoTorta(int index){
     QtCharts::QChart *chart = new QtCharts::QChart();
-    chart->setTitle(window.at(index)->getTitolo());
-    qreal pieSize = 1.0 / window.at(index)->count();
-    for (int i = 0; i < window.at(index)->count(); i++) {
+    chart->setTitle(window.at(index).getTitolo());
+    qreal pieSize = 1.0 / window[index].tabella.count();
+    for (int i = 0; i < window[index].tabella.count(); i++) {
         QtCharts::QPieSeries *series = new QtCharts::QPieSeries(chart);
-        for (const DatiPunto &data : window.at(index)->getTabella().at(i)) {
+        for (const DatiPunto &data : window[index].tabella.at(i)) {
             QtCharts::QPieSlice *slice = series->append(data.second, data.first.y());
             slice->setLabelVisible();
         }
-        qreal hPos = (pieSize / 2) + (i / (qreal) window.at(index)->count());
+        qreal hPos = (pieSize / 2) + (i / (qreal) window[index].tabella.count());
         series->setPieSize(pieSize);
         series->setHorizontalPosition(hPos);
         series->setVerticalPosition(0.5);
@@ -320,25 +305,25 @@ void MainWindow::menu_file_nuovo(){
 void MainWindow::menu_file_apri(){
     emit apri();
 }
+
 void MainWindow::menu_file_salva(){
     emit salva(window);
 }
 
-//Funziona...
 void MainWindow::menu_file_rinomina(){
     int index = tab->currentIndex();
     if(index>=0){
         QString s = QInputDialog::getText(this,tr("Rinomina"),tr("Inserire il titolo del grafico"));
         if(!s.isNull() && s!=grafici.at(index)->chart()->title()){
             grafici.at(index)->chart()->setTitle(s);
-            window.at(index)->setTitolo(s);
-            tab->tabBar()->setTabText(index,window.at(index)->getIntestazione()+tr("*"));
+            window[index].setTitolo(s); //CRASH
+            tab->tabBar()->setTabText(index,window.at(index).getIntestazione()+tr("*"));
         }
     }else{
         QMessageBox::information(this,tr("Rinomina"),tr("Non ci sono grafici da rinominare."));
     }
 }
-/*FUNZIONA!!!*/
+
 void MainWindow::updateUI(){
     QAction* check = legenda->checkedAction();
     if(check->text()=="Legenda sopra"){
@@ -363,7 +348,7 @@ void MainWindow::updateUI(){
         }
     }
 }
-/*FUNZIONA!!!*/
+
 void MainWindow::updateUIanimation(){
     if(animazione->isChecked()){
         for(QtCharts::QChartView *chartview : grafici) {
@@ -375,7 +360,7 @@ void MainWindow::updateUIanimation(){
         }
     }
 }
-//Funziona...
+
 void MainWindow::pulsante_aggiungiColonna(){
     int index = tab->currentIndex();
     int count = tabelle.at(index)->model()->columnCount();
@@ -385,7 +370,7 @@ void MainWindow::pulsante_aggiungiColonna(){
     DatiLinea l;
     DatiPunto p;
     QModelIndex modelIndex;
-    if(window.at(index)->getTipo()==DatiGrafico::TipoGrafico::torta){
+    if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::torta){
         tabelle.at(index)->model()->setHeaderData(count,Qt::Horizontal,"Torta "+QString::number(count/2)+" - fette");
         tabelle.at(index)->model()->setHeaderData(count+1,Qt::Horizontal,"Torta "+QString::number(count/2)+" - dati");
         for(int i=0;i<tabelle.at(index)->model()->rowCount();++i){
@@ -399,7 +384,7 @@ void MainWindow::pulsante_aggiungiColonna(){
             p.first.setY(0.0);
             l.push_back(p);
         }
-        window.at(index)->addLinea(l);
+        window[index].tabella.push_back(l);
         grafici.at(index)->setChart(aggiornaGraficoTorta(index));
         grafici.at(index)->setRenderHint(QPainter::Antialiasing);
     }else{
@@ -416,149 +401,75 @@ void MainWindow::pulsante_aggiungiColonna(){
             p.first.setY(0.0);
             l.push_back(p);
         }
-        window.at(index)->addLinea(l);
-        if(window.at(index)->getTipo()==DatiGrafico::TipoGrafico::linea){
+        window[index].tabella.push_back(l);
+        if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::linea){
             grafici.at(index)->setChart(aggiornaGraficoLinea(index));
             grafici.at(index)->setRenderHint(QPainter::Antialiasing);
-        }else if(window.at(index)->getTipo()==DatiGrafico::TipoGrafico::punti){
+        }else if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::punti){
             grafici.at(index)->setChart(aggiornaGraficoPunti(index));
             grafici.at(index)->setRenderHint(QPainter::Antialiasing);
         }
     }
     grafici.at(index)->setVisible(true);
     tabelle.at(index)->setVisible(true);
-    tab->tabBar()->setTabText(index,window.at(index)->getIntestazione()+tr("*"));
+    tab->tabBar()->setTabText(index,window.at(index).getIntestazione()+tr("*"));
 }
-//Funziona...
+
 void MainWindow::pulsante_eliminaColonna(){
     int index = tab->currentIndex();
     int count = tabelle.at(index)->model()->columnCount();
     if(count>0){
         tabelle.at(index)->model()->removeColumn(count-1);
         tabelle.at(index)->model()->removeColumn(count-2);
-        window.at(index)->removeLinea();
-        if(window.at(index)->getTipo()==DatiGrafico::TipoGrafico::torta){
+        window[index].tabella.pop_back(); //CRASH
+        if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::torta){
             grafici.at(index)->setChart(aggiornaGraficoTorta(index));
             grafici.at(index)->setRenderHint(QPainter::Antialiasing);
-        }else if(window.at(index)->getTipo()==DatiGrafico::TipoGrafico::linea){
+        }else if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::linea){
             grafici.at(index)->setChart(aggiornaGraficoLinea(index));
             grafici.at(index)->setRenderHint(QPainter::Antialiasing);
-        }else if(window.at(index)->getTipo()==DatiGrafico::TipoGrafico::punti){
+        }else if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::punti){
             grafici.at(index)->setChart(aggiornaGraficoPunti(index));
             grafici.at(index)->setRenderHint(QPainter::Antialiasing);
         }
-        tab->tabBar()->setTabText(index,window.at(index)->getIntestazione()+tr("*"));
+        tab->tabBar()->setTabText(index,window.at(index).getIntestazione()+tr("*"));
     }
 }
-//Funziona...
+
 void MainWindow::modificaCella(){
     int index = tab->currentIndex();
-    if(window.at(index)->getTipo()==DatiGrafico::TipoGrafico::torta){
+    if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::torta){
         QModelIndex modelIndex;
-        for(int j=0;j<window.at(index)->count();++j){
-            for(int i=0;i<window.at(index)->getLinea(j).count();++i){
+        for(int j=0;j<window[index].tabella.count();++j){
+            for(int i=0;i<window[index].tabella.at(j).count();++i){
                 //nome
                 modelIndex = tabelle.at(index)->model()->index(i,j*2);
-                window.at(index)->setPunto(modelIndex.data().toString(),j,i);
+                window[index].tabella[j][i].second = modelIndex.data().toString();
                 //dato (y)
                 modelIndex = tabelle.at(index)->model()->index(i,j*2+1);
-                window.at(index)->setPunto(0.0,modelIndex.data().toInt(),j,i);
+                window[index].tabella[j][i].first.setY(modelIndex.data().toInt());
             }
         }
         grafici.at(index)->setChart(aggiornaGraficoTorta(index));
         grafici.at(index)->setRenderHint(QPainter::Antialiasing);
     }else{
         QModelIndex modelIndexX,modelIndexY;
-        for(int j=0;j<window.at(index)->count();++j){
-            for(int i=0;i<window.at(index)->getLinea(j).count();++i){
+        for(int j=0;j<window[index].tabella.count();++j){
+            for(int i=0;i<window[index].tabella.at(j).count();++i){ //CRASH(aggiungi colonna) CRASH modifica cella (getLinea(j))
                 //x e y
                 modelIndexX = tabelle.at(index)->model()->index(i,j*2);
                 modelIndexY = tabelle.at(index)->model()->index(i,j*2+1);
-                window.at(index)->setPunto(modelIndexX.data().toInt(),modelIndexY.data().toInt(),j,i);
+                window[index].tabella[j][i].first.setX(modelIndexX.data().toInt());
+                window[index].tabella[j][i].first.setY(modelIndexY.data().toInt());
             }
         }
-        if(window.at(index)->getTipo()==DatiGrafico::TipoGrafico::linea){
+        if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::linea){
             grafici.at(index)->setChart(aggiornaGraficoLinea(index));
             grafici.at(index)->setRenderHint(QPainter::Antialiasing);
-        }else if(window.at(index)->getTipo()==DatiGrafico::TipoGrafico::punti){
+        }else if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::punti){
             grafici.at(index)->setChart(aggiornaGraficoPunti(index));
             grafici.at(index)->setRenderHint(QPainter::Antialiasing);
         }
     }
-    tab->tabBar()->setTabText(index,window.at(index)->getIntestazione()+tr("*"));
+    tab->tabBar()->setTabText(index,window.at(index).getIntestazione()+tr("*"));
 }
-
-/*/non funziona??????????????
-/*void MainWindow::pulsante_aggiungiRiga(){
-    int index = tab->currentIndex();
-    int count = tabelle.at(index)->model()->columnCount();
-    int row = tabelle.at(index)->model()->rowCount();
-    if(count>0){
-        tabelle.at(index)->model()->insertRow(row);
-        QModelIndex modelIndex;
-        DatiPunto p;
-        if(window.at(index)->getTipo()==DatiGrafico::torta){
-            for(int i=0;i<count/2;++i){
-                //nome
-                modelIndex = tabelle.at(index)->model()->index(row,i*2);
-                tabelle.at(index)->model()->setData(modelIndex,tr(""));
-                p.second = tr("");
-                //y
-                modelIndex = tabelle.at(index)->model()->index(row,i*2+1);
-                tabelle.at(index)->model()->setData(modelIndex,0.0);
-                p.first.setY(0.0);
-                window.at(index)->getLinea(i).push_back(p);
-            }
-            grafici.at(index)->setChart(aggiornaGraficoTorta(index));
-            grafici.at(index)->setRenderHint(QPainter::Antialiasing);
-        }else{
-            for(int i=0;i<count/2;++i){
-                //x
-                modelIndex = tabelle.at(index)->model()->index(row,i*2);
-                tabelle.at(index)->model()->setData(modelIndex,0.000);
-                p.first.setX(0.000);
-                //y
-                modelIndex = tabelle.at(index)->model()->index(row,i*2+1);
-                tabelle.at(index)->model()->setData(modelIndex,0.0);
-                p.first.setY(0.0);
-                window.at(index)->getLinea(i).push_back(p);
-            }
-            if(window.at(index)->getTipo()==DatiGrafico::TipoGrafico::linea){
-                grafici.at(index)->setChart(aggiornaGraficoLinea(index));
-                grafici.at(index)->setRenderHint(QPainter::Antialiasing);
-            }else if(window.at(index)->getTipo()==DatiGrafico::TipoGrafico::punti){
-                grafici.at(index)->setChart(aggiornaGraficoPunti(index));
-                grafici.at(index)->setRenderHint(QPainter::Antialiasing);
-            }
-        }
-        QItemSelectionModel *selectionModel = new QItemSelectionModel(tabelle.at(index)->model());
-        tabelle.at(index)->setSelectionModel(selectionModel);
-        connect(tabelle.at(index)->model(),&QAbstractItemModel::dataChanged,this,&MainWindow::modificaCella);
-        grafici.at(index)->setVisible(true);
-        tabelle.at(index)->setVisible(true);
-        tab->tabBar()->setTabText(index,window.at(index)->getIntestazione()+tr("*"));
-    }
-}
-//non funziona??????????????
-/void MainWindow::pulsante_eliminaRiga(){
-    int index = tab->currentIndex();
-    int columnCount = tabelle.at(index)->model()->columnCount();
-    int rowCount = tabelle.at(index)->model()->rowCount();
-    if(columnCount>0 && rowCount>0){
-        tabelle.at(index)->model()->removeRow(rowCount-1);
-        for(int i=0;i<window.at(index)->count();++i)
-            window.at(index)->getLinea(i).pop_back();
-        if(window.at(index)->getTipo()==DatiGrafico::TipoGrafico::torta){
-            grafici.at(index)->setChart(aggiornaGraficoTorta(index));
-            grafici.at(index)->setRenderHint(QPainter::Antialiasing);
-        }else if(window.at(index)->getTipo()==DatiGrafico::TipoGrafico::linea){
-            grafici.at(index)->setChart(aggiornaGraficoLinea(index));
-            grafici.at(index)->setRenderHint(QPainter::Antialiasing);
-        }else if(window.at(index)->getTipo()==DatiGrafico::TipoGrafico::punti){
-            grafici.at(index)->setChart(aggiornaGraficoPunti(index));
-            grafici.at(index)->setRenderHint(QPainter::Antialiasing);
-        }
-        tab->tabBar()->setTabText(index,window.at(index)->getIntestazione()+tr("*"));
-    }
-}
-*/

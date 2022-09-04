@@ -15,19 +15,18 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget* = 0);
-    explicit MainWindow(DatiGrafico*,QWidget* = 0);
     ~MainWindow();
 
-    void aggiungiGrafico(DatiGrafico*);
+    void aggiungiGrafico(const DatiGrafico &);
 
 private:
     void impostaMenuBar(QMenuBar*);
-    QSplitter* impostaGrafico(DatiGrafico*,QWidget*);
-    QWidget* baseTabella(DatiGrafico*,QWidget*);
-    QTableView* creaTabella(DatiGrafico*,QWidget*);
-    QtCharts::QChartView* creaGraficoLinea(DatiGrafico*);
-    QtCharts::QChartView* creaGraficoPunti(DatiGrafico*);
-    QtCharts::QChartView* creaGraficoTorta(DatiGrafico*);
+    QSplitter* impostaGrafico(const DatiGrafico&,QWidget*);
+    QWidget* baseTabella(const DatiGrafico&,QWidget*);
+    QTableView* creaTabella(const DatiGrafico&,QWidget*);
+    QtCharts::QChartView* creaGraficoLinea(const DatiGrafico&);
+    QtCharts::QChartView* creaGraficoPunti(const DatiGrafico&);
+    QtCharts::QChartView* creaGraficoTorta(const DatiGrafico&);
     QtCharts::QChart* aggiornaGraficoLinea(int);
     QtCharts::QChart* aggiornaGraficoPunti(int);
     QtCharts::QChart* aggiornaGraficoTorta(int);
@@ -36,19 +35,19 @@ private:
     QAction* animazione;
     QTabWidget *tab;
 
-    QVector<DatiGrafico*> window;
+    QVector<DatiGrafico> window;
     QVector<QTableView*> tabelle;
     QVector<QtCharts::QChartView*> grafici;
 
 signals:
     void nuovo();
     void apri();
-    void salva(QVector<DatiGrafico*>);
-
-private slots:
+    void salva(const QVector<DatiGrafico>&);
+public slots:
     void menu_file_nuovo();
     void menu_file_apri();
     void menu_file_salva();
+private slots:
     void menu_file_rinomina();
     void updateUI();
     void updateUIanimation();
