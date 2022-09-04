@@ -174,7 +174,7 @@ Composto Controller::crea_composto(){
         if(!doc.isObject()){
             ok = QMessageBox::question(view,QString("Nuovo Composto"),QString("Non ci sono elementi da poter inserire, vuole creare un elemento?"));
             while(ok){
-                Elemento e = crea_elemento();
+                Elemento e(crea_elemento());
                 if(e.getNome().empty()){
                     QMessageBox::critical(view,QString("Composto non creato"),QString("Ci sono stati degli errori nella creazione del compposto."));
                     file.close();
@@ -229,20 +229,21 @@ Miscela Controller::crea_miscela(){
         }
     }
     Miscela miscela(nome.toStdString(),fromStringToStato(stato),massa,volume,temperatura,soluzione);
-    Composto composto;
     ok=true;
     while(ok){
-        QString fileName = QFileDialog::getOpenFileName(view,QString("Nuova Miscela - selezionare Composto"),QDir::homePath(),QString("*.json"));
+        QString fileName = QFileDialog::getOpenFileName(view,QString("Nuova Miscela - selezionare un Composto"),QDir::homePath(),QString("*.json"));
         if(!fileName.isEmpty()){
             QFile file(fileName);
             if(isFileOpenRead(file)){
                 QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-                composto = lettura_composto(doc);
-                if(!composto.getNome().empty()){
-                    miscela.push_back(composto);
-                    file.close();
-                }
-            }else file.close();
+                if(doc.isObject() && doc.object()["tipologia"]=="composto"){
+                    Composto composto(lettura_composto(doc));
+                    if(!composto.getNome().empty())
+                        miscela.push_back(composto);
+                }else
+                    QMessageBox::critical(view,QString("Errore"),QString("Non è stato possibile aprire il file indicato."));
+            }
+            file.close();
         }else ok=false;
     }
     return miscela;
@@ -365,21 +366,23 @@ void Controller::salva_miscela_json(QJsonObject& obj,Miscela* miscela,const Dati
     obj.insert("volume",miscela->getVolume());
     obj.insert("temperatura",miscela->getTemperatura());
     obj.insert("soluzione",miscela->isSoluzione());
-    QJsonObject lista;
+    QJsonArray lista;
     for(auto i = miscela->begin();i!=miscela->end();++i){
         QJsonObject c;
         c.insert("formula",QString::fromStdString(i->getFormulaChimica()));
         c.insert("nome",QString::fromStdString(i->getNome()));
-        c.insert("stato",QString(i->getMateria()));
+        c.insert("stato",fromStatoToString(i->getMateria()));
         c.insert("massa",i->getMassa());
         c.insert("volume",i->getVolume());
         c.insert("temperatura",i->getTemperatura());
         c.insert("moli",QString(i->getNMoli()).toInt());
         QJsonArray array;
-        for(auto j=i->begin();j!=i->end();++j)
-            array.push_back(QString(j->getNumAtomico()).toInt());
+        for(auto j=i->begin();j!=i->end();++j){
+            qDebug() << j->getNumAtomico();
+            array.push_back(QString::number(j->getNumAtomico()));
+        }
         c.insert("lista",array);
-        lista.insert(QString::fromStdString(i->getNome()),c);
+        lista.push_back(c);
     }
     obj.insert("lista",lista);
     QJsonObject grafico;
@@ -417,7 +420,7 @@ void Controller::nuovo_file(){
     if(s==QString("Elemento")){
         crea_elemento();
     }else if(s==QString("Composto")){
-        Composto composto = crea_composto();
+        Composto composto(crea_composto());
         if(composto.getNome()=="")return;
         DatiGrafico grafico(QString::fromStdString(composto.getFormulaChimica()),
                       QString::fromStdString(composto.getNome()),
@@ -430,7 +433,7 @@ void Controller::nuovo_file(){
         insertInModel(new Composto(composto),QString());
         view->aggiungiGrafico(grafico);
     }else if(s==QString("Miscela")){
-        Miscela miscela = crea_miscela();
+        Miscela miscela(crea_miscela());
         if(miscela.getNome()=="") return;
         unsigned int nmax = 0;
         for(Miscela::iterator i=miscela.begin();i!=miscela.end();++i){
@@ -451,7 +454,7 @@ void Controller::nuovo_file(){
                 grafico.tabella[i][j].first.setY(0.0);
             }
         }
-        insertInModel(&miscela,QString());
+        insertInModel(new Miscela(miscela),QString());
         view->aggiungiGrafico(grafico);
     }else{
         items.clear();
@@ -645,6 +648,7 @@ void Controller::apri_file(){
     for(int i=0;i<model.count();++i){
         if(fileName==model.at(i).second){
             QMessageBox::information(view,QString("File aperto"),QString("Il file indicato è già aperto."));
+            return;
         }
     }
     QFile file(fileName);
@@ -660,12 +664,15 @@ void Controller::apri_file(){
     }
     QString tipologia = doc.object()["tipologia"].toString();
     if(tipologia == QString("composto")){
-        Composto c = lettura_composto(doc);
+        Composto c(lettura_composto(doc));
         if(c.getNome()=="")return;
         insertInModel(new Composto(c),fileName);
         view->aggiungiGrafico(lettura_grafico(doc));
     }else if(tipologia == QString("miscela")){
-
+        Miscela m(lettura_miscela(doc));
+        if(m.getNome()=="")return;
+        insertInModel(new Miscela(m),fileName);
+        view->aggiungiGrafico(lettura_grafico(doc));
     }else if(tipologia == QString("massa molare")){
 
     }else if(tipologia == QString("temperatura")){
@@ -682,8 +689,10 @@ void Controller::salva_file(const QVector<DatiGrafico> &window){
         bool ok = QMessageBox::question(view,QString("Salva file"),QString("Vuole salvare il grafico ")+QString::fromStdString(model.at(i).first->getNome())+QString("?"));
         //identificare il file o crearne uno
         QString fileName = model.at(i).second;
-        if(ok && fileName.isEmpty())
+        if(ok && fileName.isEmpty()){
             fileName = QFileDialog::getSaveFileName(view,QString("Salva il grafico ")+QString::fromStdString(model.at(i).first->getNome()),QDir::homePath(),QString("*.json"));
+            model[i].second = fileName;
+        }
         if(ok && !fileName.isEmpty()){
             QFile file(fileName);
             if(!isFileOpenWrite(file)){

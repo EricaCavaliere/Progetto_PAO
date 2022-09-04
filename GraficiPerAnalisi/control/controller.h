@@ -23,8 +23,10 @@ private:
 
     bool isFileOpenRead(QFile&);
     bool isFileOpenWrite(QFile&);
+
     void insertInModel(Campione*, QString);
     void viewTable(QAbstractItemModel*);
+
     Campione::Stato fromStringToStato(QString);
     QString fromStatoToString(Campione::Stato);
     DatiGrafico::TipoGrafico fromStringToGrafico(QString);
@@ -34,9 +36,9 @@ private:
     Composto crea_composto();
     Miscela crea_miscela();
 
-    Composto lettura_composto(QJsonDocument&); //
-    Miscela lettura_miscela(QJsonDocument&); //
-    DatiGrafico lettura_grafico(QJsonDocument&);//
+    Composto lettura_composto(QJsonDocument&);
+    Miscela lettura_miscela(QJsonDocument&);
+    DatiGrafico lettura_grafico(QJsonDocument&);
 
     void salva_composto_json(QJsonObject&,Composto*,const DatiGrafico&);
     void salva_miscela_json(QJsonObject&,Miscela*,const DatiGrafico&);
