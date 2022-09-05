@@ -49,6 +49,9 @@ public slots:
     void apri_file();
     void salva_file(const QVector<DatiGrafico>&);
 
+    //da pensare a come implementarla e se implementarla
+    void modifica_tabella(const QModelIndex &topLeft,const QModelIndex &bottomRight,const QVector<int> &roles = QVector<int>());
+
 };
 
 #endif // CONTROLLER_H

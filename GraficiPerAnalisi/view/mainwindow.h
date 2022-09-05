@@ -53,6 +53,8 @@ private slots:
     void updateUIanimation();
     void pulsante_aggiungiColonna();
     void pulsante_eliminaColonna();
+    void pulsante_aggiungiRiga();
+    void pulsante_eliminaRiga();
     void modificaCella();
 };
 

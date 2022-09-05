@@ -44,10 +44,12 @@ void Controller::insertInModel(Campione* c,QString s){
     model.push_back(path);
 }
 
+//rendere possibile salvare le modifiche alle celle
 void Controller::viewTable(QAbstractItemModel* model){
-    QTableView* view = new QTableView;
-    view->setModel(model);
-    view->show();
+    QTableView* table = new QTableView;
+    table->setModel(model);
+    table->show();
+    connect(table->model(),&QAbstractItemModel::dataChanged,this,&Controller::modifica_tabella);
 }
 
 Campione::Stato Controller::fromStringToStato(QString stato){
@@ -172,8 +174,9 @@ Composto Controller::crea_composto(){
     if(isFileOpenRead(file)){
         QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
         if(!doc.isObject()){
-            ok = QMessageBox::question(view,QString("Nuovo Composto"),QString("Non ci sono elementi da poter inserire, vuole creare un elemento?"));
-            while(ok){
+            QMessageBox::StandardButton button;
+            button = QMessageBox::question(view,QString("Nuovo Composto"),QString("Non ci sono elementi da poter inserire, vuole creare un elemento?"), QMessageBox::Yes | QMessageBox::No);
+            while(button==QMessageBox::Yes){
                 Elemento e(crea_elemento());
                 if(e.getNome().empty()){
                     QMessageBox::critical(view,QString("Composto non creato"),QString("Ci sono stati degli errori nella creazione del compposto."));
@@ -181,7 +184,7 @@ Composto Controller::crea_composto(){
                     return Composto();
                 }
                 composto.push_back(e);
-                ok = QMessageBox::question(view,QString("Nuovo Composto"),QString("Vuole creare un altro elemento?"));
+                button = QMessageBox::question(view,QString("Nuovo Composto"),QString("Vuole creare un altro elemento?"), QMessageBox::Yes | QMessageBox::No);
             }
         }else{
             items.clear();
@@ -196,9 +199,9 @@ Composto Controller::crea_composto(){
                     items.removeOne(n);
                     QStringList s;
                     s = n.split("-");
-                    Elemento e(doc.object()[s.at(1)].toObject()["nome"].toString().toStdString(),
-                            doc.object()[s.at(1)].toObject()["numAtomico"].toInt(),
-                            doc.object()[s.at(1)].toObject()["numMassa"].toDouble());
+                    Elemento e(doc.object()[s.back()].toObject()["nome"].toString().toStdString(),
+                            doc.object()[s.back()].toObject()["numAtomico"].toInt(),
+                            doc.object()[s.back()].toObject()["numMassa"].toDouble());
                     composto.push_back(e);
                 }
             }
@@ -223,8 +226,11 @@ Miscela Controller::crea_miscela(){
             volume = QInputDialog::getDouble(view,QString("Nuova Miscela"),QString("Inserire il volume:"),0,0,1000000,4,&ok);
             if(ok){
                 temperatura = QInputDialog::getDouble(view,QString("Nuova Miscela"),QString("Inserire la temperatura:"),0,-1000,1000,2,&ok);
-                if(ok)
-                    soluzione = QMessageBox::question(view,QString("Nuova Miscela"),QString("La Miscela analizzata è una soluzione?"));
+                if(ok){
+                    QMessageBox::StandardButton button;
+                    button = QMessageBox::question(view,QString("Nuova Miscela"),QString("La Miscela analizzata è una soluzione?"), QMessageBox::Yes | QMessageBox::No);
+                    if(button==QMessageBox::No)soluzione=false;
+                }
             }
         }
     }
@@ -236,7 +242,7 @@ Miscela Controller::crea_miscela(){
             QFile file(fileName);
             if(isFileOpenRead(file)){
                 QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-                if(doc.isObject() && doc.object()["tipologia"]=="composto"){
+                if(doc.isObject() && doc.object().contains("tipologia") && doc.object()["tipologia"]=="composto"){
                     Composto composto(lettura_composto(doc));
                     if(!composto.getNome().empty())
                         miscela.push_back(composto);
@@ -422,9 +428,7 @@ void Controller::nuovo_file(){
     }else if(s==QString("Composto")){
         Composto composto(crea_composto());
         if(composto.getNome()=="")return;
-        DatiGrafico grafico(QString::fromStdString(composto.getFormulaChimica()),
-                      QString::fromStdString(composto.getNome()),
-                      DatiGrafico::torta,composto.size());
+        DatiGrafico grafico(QString::fromStdString(composto.getFormulaChimica()),QString("Composto"),DatiGrafico::torta,composto.size());
         for(unsigned int i=0; i<composto.size();++i){
             grafico.tabella[0][i].second = QString::fromStdString(composto[i].getNome());
             grafico.tabella[0][i].first.setX(0.0);
@@ -439,9 +443,7 @@ void Controller::nuovo_file(){
         for(Miscela::iterator i=miscela.begin();i!=miscela.end();++i){
             if(i->size()>nmax) nmax = i->size();
         }
-        DatiGrafico grafico(QString::fromStdString(miscela.getNome()),
-                            QString::fromStdString(miscela.getNome()),
-                            DatiGrafico::torta,nmax,20,miscela.size());
+        DatiGrafico grafico(QString::fromStdString(miscela.getNome()),QString("Miscela"),DatiGrafico::torta,nmax,20,miscela.size());
         for(unsigned int i=0;i<miscela.size();++i){
             for(unsigned int j=0;j<miscela[i].size();++j){
                 grafico.tabella[i][j].second = QString::fromStdString(miscela[i][j].getNome());
@@ -458,186 +460,160 @@ void Controller::nuovo_file(){
         view->aggiungiGrafico(grafico);
     }else{
         items.clear();
-        items << QString("Analizzare la massa molare di uno o più composti o dei composti di una miscela") //linea
+        items << QString("Analizzare la massa molare dei composti di una miscela") //linea
               << QString("Confrontare le temperature dei composti di una miscela") //punti
-              << QString("Analizzare la molarità (rapporto moli e volume)");//linea
+              << QString("Analizzare la molarità di una miscela (rapporto moli e volume)");//linea
         s = QInputDialog::getItem(view,QString("Nuovo grafico"),QString("Che cosa vuole creare?"),items,0,false,&ok);
-//------//da controllare//------------------------------------------------------------------------------------------------------//
-        /*
         if(!ok) return;
-        if(s=="Analizzare la massa molare di uno o più composti"){
-            Composto composto;
-            Miscela miscela("Grafico a linea");
+        if(s=="Analizzare la massa molare dei composti di una miscela"){
+            Miscela miscela("Massa molare");
             QString fileName = QFileDialog::getOpenFileName(view,QString("Massa molare - selezionare un Composto o una Miscela"),QDir::homePath(),QString("*.json"));
-            if(!fileName.isEmpty()){
-                QFile file(fileName);
-                if(isFileOpenRead(file)){
-                    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-                    if(!doc.isObject() || !doc.object().contains("tipologia")){
-                        QMessageBox::critical(view,QString("Errore nella lettura del file"),QString("C'è stato un problema di lettura del file."));
-                        file.close();
-                    }else{
-                        if(doc.object()["tipologia"]=="composto"){
-                            do{
-                                file.close();
-                                composto = lettura_composto(&file);
-                                if(!composto.getNome().empty()){
-                                    miscela.push_back(composto);
-                                    file.close();
-                                }
-                                fileName = QFileDialog::getOpenFileName(view,QString("Massa molare - selezionare un Composto"),QDir::homePath(),QString("*.json"));
-                                if(!fileName.isEmpty()){
-                                    file.setFileName(fileName);
-                                    if(!file.open(QIODevice::ReadOnly)){
-                                        QMessageBox::critical(view,QString("Errore nella lettura del file"),QString("C'è stato un problema di lettura del file."));
-                                        file.close();
-                                    }
-                                }else ok = false;
-                            }while(ok);
-                        }else if(doc.object()["tipologia"]=="miscela"){
-//--------------------------//miscela = lettura_miscela(doc);//----------------------//
-                            file.close();
-                        }
-                        if(!miscela.empty()){
-                            DatiGrafico grafico(QString::fromStdString(miscela.getNome()),
-                                                QString::fromStdString(miscela.getNome()),
-                                                DatiGrafico::linea,miscela.size());
-                            for(unsigned int i=0;i<miscela.size();++i){
-                                grafico.tabella[0][i].second = QString::fromStdString(miscela[i].getNome());
-                                grafico.tabella[0][i].first.setX(i+1);
-                                grafico.tabella[0][i].first.setY((qreal)miscela[i].getMassaMolare());
-                            }
-                            insertInModel(miscela,QString());
-                            view->aggiungiGrafico(grafico);
-                            //aggiungere una finestra a parte per visualizzare la massa molare di ogni composto
-                            //controllare se la tabella e' visibile e se le celle sono modificabili
-                            //se le celle si possono modificare creare un comando per quando vengono modificate
-                            QAbstractItemModel *model = new QStandardItemModel(miscela.size(),4);
-                            model->setHeaderData(0,Qt::Horizontal,QString("Nome composto"));
-                            model->setHeaderData(1,Qt::Horizontal,QString("Massa"));
-                            model->setHeaderData(2,Qt::Horizontal,QString("Moli"));
-                            model->setHeaderData(3,Qt::Horizontal,QString("Massa molare"));
-                            QModelIndex index;
-                            QVariant value;
-                            for(unsigned int i=0;i<miscela.size();++i){
-                                index = model->index(i,0);
-                                value = QString::fromStdString(miscela[i].getNome());
-                                model->setData(index,value);
-                                index = model->index(i,1);
-                                value = miscela[i].getMassa();
-                                model->setData(index,value);
-                                index = model->index(i,2);
-                                value = miscela[i].getNMoli();
-                                model->setData(index,value);
-                                index = model->index(i,3);
-                                value = miscela[i].getMassaMolare();
-                                model->setData(index,value);
-                            }
-                            viewTable(model);
-                        }else{
-                            QMessageBox::critical(view,QString("Errore"),QString("Non è stato possibile creare il grafico"));
-                        }
-                    }
-                }else file.close();
+            if(fileName.isEmpty()) return;
+            QFile file(fileName);
+            if(!isFileOpenRead(file)){
+                file.close();
+                return;
             }
-        }else if("Confrontare le temperature dei composti di una miscela"){
-            Miscela miscela("Grafico a punti");
+            QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+            if(!doc.isObject() || !doc.object().contains("tipologia") || doc.object()["tipologia"]!="miscela"){
+                QMessageBox::critical(view,QString("Errore nella lettura del file"),QString("C'è stato un problema di lettura del file."));
+                file.close();
+                return;
+            }
+            miscela = lettura_miscela(doc);
+            file.close();
+            if(miscela.empty()){
+                QMessageBox::critical(view,QString("Errore"),QString("Non è stato possibile creare il grafico"));
+                return;
+            }
+            DatiGrafico grafico(QString::fromStdString(miscela.getNome()),QString("Massa molare"),DatiGrafico::linea,miscela.size());
+            for(unsigned int i=0;i<miscela.size();++i){
+                grafico.tabella[0][i].second = QString::fromStdString(miscela[i].getNome());
+                grafico.tabella[0][i].first.setX(i+1);
+                grafico.tabella[0][i].first.setY((qreal)miscela[i].getMassaMolare());
+            }
+            insertInModel(new Miscela(miscela),QString());
+            view->aggiungiGrafico(grafico);
+            /*
+            QAbstractItemModel *model = new QStandardItemModel(miscela.size(),4);
+            model->setHeaderData(0,Qt::Horizontal,QString("Nome composto"));
+            model->setHeaderData(1,Qt::Horizontal,QString("Massa"));
+            model->setHeaderData(2,Qt::Horizontal,QString("Moli"));
+            model->setHeaderData(3,Qt::Horizontal,QString("Massa molare"));
+            QModelIndex index;
+            QVariant value;
+            for(unsigned int i=0;i<miscela.size();++i){
+                index = model->index(i,0);
+                value = QString::fromStdString(miscela[i].getNome());
+                model->setData(index,value);
+                index = model->index(i,1);
+                value = miscela[i].getMassa();
+                model->setData(index,value);
+                index = model->index(i,2);
+                value = miscela[i].getNMoli();
+                model->setData(index,value);
+                index = model->index(i,3);
+                value = miscela[i].getMassaMolare();
+                model->setData(index,value);
+            }
+            viewTable(model);
+            */
+        }else if(s=="Confrontare le temperature dei composti di una miscela"){
+            Miscela miscela("Temperatura");
             QString fileName = QFileDialog::getOpenFileName(view,QString("Confronto temperature - selezionare una Miscela"),QDir::homePath(),QString("*.json"));
-            if(!fileName.isEmpty()){
-                QFile file(fileName);
-                if(isFileOpenRead(file)){
-                    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-                    if(!doc.isObject() || (!doc.object().contains("tipologia")||doc.object()["tipologia"]!="miscela")){
-                        QMessageBox::critical(view,QString("Errore nella lettura del file"),QString("C'è stato un problema di lettura del file."));
-                        file.close();
-                    }else{
-//----------------------//miscela = lettura_miscela(doc);//---------------------//
-                        if(!miscela.empty()){
-                            DatiGrafico grafico(QString::fromStdString(miscela.getNome()),
-                                                QString::fromStdString(miscela.getNome()),
-                                                DatiGrafico::linea,miscela.size(),20);
-                            for(unsigned int i=0;i<miscela.size();++i){
-                                grafico.tabella[0][i].second = QString::fromStdString(miscela[i].getNome());
-                                grafico.tabella[0][i].first.setX((qreal)(i+1));
-                                grafico.tabella[0][i].first.setY((qreal) miscela[i].getTemperatura());
-                            }
-                            insertInModel(miscela,QString());
-                            view->aggiungiGrafico(grafico);
-                            //aggiungere una finestra a parte per visualizzare i dati di ogni composto(Datigrafico)
-                            //controllare se la tabella e' visibile e se le celle sono modificabili
-                            //se le celle si possono modificare creare un comando per quando vengono modificate
-                            QAbstractItemModel *model = new QStandardItemModel(miscela.size(),2);
-                            model->setHeaderData(0,Qt::Horizontal,QString("Nome composto"));
-                            model->setHeaderData(1,Qt::Horizontal,QString("Temperatura"));
-                            QModelIndex index;
-                            QVariant value;
-                            for(unsigned int i=0;i<miscela.size();++i){
-                                index = model->index(i,0);
-                                value = QString::fromStdString(miscela[i].getNome());
-                                model->setData(index,value);
-                                index = model->index(i,1);
-                                value = miscela[i].getTemperatura();
-                                model->setData(index,value);
-                            }
-                            viewTable(model);
-                        }else{
-                            QMessageBox::critical(view,QString("Errore"),QString("Non è stato possibile creare il grafico"));
-                        }
-                    }
-                }else file.close();
+            if(fileName.isEmpty()) return;
+            QFile file(fileName);
+            if(isFileOpenRead(file)){
+                file.close();
+                return;
             }
-        }else if("Analizzare la molarità (rapporto moli e volume)"){
+            QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+            if(!doc.isObject() || (!doc.object().contains("tipologia")||doc.object()["tipologia"]!="miscela")){
+                QMessageBox::critical(view,QString("Errore nella lettura del file"),QString("C'è stato un problema di lettura del file."));
+                file.close();
+                return;
+            }
+            miscela = lettura_miscela(doc);
+            if(miscela.empty()){
+                QMessageBox::critical(view,QString("Errore"),QString("Non è stato possibile creare il grafico"));
+                return;
+            }
+            DatiGrafico grafico(QString::fromStdString(miscela.getNome()),QString("Temperatura"),DatiGrafico::linea,miscela.size(),20);
+            for(unsigned int i=0;i<miscela.size();++i){
+                grafico.tabella[0][i].second = QString::fromStdString(miscela[i].getNome());
+                grafico.tabella[0][i].first.setX((qreal)(i+1));
+                grafico.tabella[0][i].first.setY((qreal) miscela[i].getTemperatura());
+            }
+            insertInModel(new Miscela(miscela),QString());
+            view->aggiungiGrafico(grafico);
+            /*
+            QAbstractItemModel *model = new QStandardItemModel(miscela.size(),2);
+            model->setHeaderData(0,Qt::Horizontal,QString("Nome composto"));
+            model->setHeaderData(1,Qt::Horizontal,QString("Temperatura"));
+            QModelIndex index;
+            QVariant value;
+            for(unsigned int i=0;i<miscela.size();++i){
+                index = model->index(i,0);
+                value = QString::fromStdString(miscela[i].getNome());
+                model->setData(index,value);
+                index = model->index(i,1);
+                value = miscela[i].getTemperatura();
+                model->setData(index,value);
+            }
+            viewTable(model);
+            */
+        }else if(s=="Analizzare la molarità di una miscela (rapporto moli e volume)"){
             Composto composto;
-            Miscela miscela("Grafico a linea");
+            Miscela miscela("Molarità");
             QString fileName = QFileDialog::getOpenFileName(view,QString("Molarità - selezionare una Miscela"),QDir::homePath(),QString("*.json"));
-            if(!fileName.isEmpty()){
-                QFile file(fileName);
-                if(isFileOpenRead(file)){
-                    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-                    if(!doc.isObject() || (!doc.object().contains("tipologia")||doc.object()["tipologia"]!="miscela")){
-                        QMessageBox::critical(view,QString("Errore nella lettura del file"),QString("C'è stato un problema di lettura del file."));
-                    }else{
-//----------------------//miscela = lettura_miscela(doc);//---------------------//
-                        if(!miscela.empty() && miscela.isSoluzione()){
-                            DatiGrafico grafico(QString::fromStdString(miscela.getNome()),
-                                                QString::fromStdString(miscela.getNome()),
-                                                DatiGrafico::linea,miscela.size(),20);
-                            DatiPunto punto;
-                            for(unsigned int i=0;i<miscela.size();++i){
-                                grafico.tabella[0][i].second = QString::fromStdString(miscela[i].getNome());
-                                grafico.tabella[0][i].first.setX((qreal)(i+1));
-                                grafico.tabella[0][i].first.setY((qreal)miscela.molarita(miscela[i]));
-                            }
-                            insertInModel(miscela,QString());
-                            view->aggiungiGrafico(grafico);
-                            //aggiungere una finestra a parte per visualizzare i dati di ogni composto(Datigrafico)
-                            //controllare se la tabella e' visibile e se le celle sono modificabili
-                            //se le celle si possono modificare creare un comando per quando vengono modificate
-                            QAbstractItemModel *model = new QStandardItemModel(miscela.size(),3);
-                            model->setHeaderData(0,Qt::Horizontal,QString("Nome composto"));
-                            model->setHeaderData(1,Qt::Horizontal,QString("Moli Soluto"));
-                            model->setHeaderData(2,Qt::Horizontal,QString("Molarità"));
-                            QModelIndex index;
-                            QVariant value;
-                            for(unsigned int i=0;i<miscela.size();++i){
-                                index = model->index(i,0);
-                                value = QString::fromStdString(miscela[i].getNome());
-                                model->setData(index,value);
-                                index = model->index(i,1);
-                                value = miscela.massaSoluto(miscela[i]);
-                                model->setData(index,value);
-                                index = model->index(i,2);
-                                value = miscela.molarita(miscela[i]);
-                                model->setData(index,value);
-                            }
-                            viewTable(model);
-                        }else{
-                            QMessageBox::critical(view,QString("Errore"),QString("Non è stato possibile creare il grafico"));
-                        }
-                    }
-                }else file.close();
+            if(fileName.isEmpty())return;
+            QFile file(fileName);
+            if(!isFileOpenRead(file)){
+                file.close();
+                return;
             }
-        }*/
+            QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+            if(!doc.isObject() || (!doc.object().contains("tipologia")||doc.object()["tipologia"]!="miscela")){
+                QMessageBox::critical(view,QString("Errore nella lettura del file"),QString("C'è stato un problema di lettura del file."));
+                file.close();
+                return;
+            }
+            miscela = lettura_miscela(doc);
+            if(miscela.empty() || !miscela.isSoluzione()){
+                QMessageBox::critical(view,QString("Errore"),QString("Non è stato possibile creare il grafico"));
+                file.close();
+                return;
+            }
+            DatiGrafico grafico(QString::fromStdString(miscela.getNome()),QString("Molarità"),DatiGrafico::linea,miscela.size(),20);
+            DatiPunto punto;
+            for(unsigned int i=0;i<miscela.size();++i){
+                grafico.tabella[0][i].second = QString::fromStdString(miscela[i].getNome());
+                grafico.tabella[0][i].first.setX((qreal)(i+1));
+                grafico.tabella[0][i].first.setY((qreal)miscela.molarita(miscela[i]));
+            }
+            insertInModel(new Miscela(miscela),QString());
+            view->aggiungiGrafico(grafico);
+            /*
+            QAbstractItemModel *model = new QStandardItemModel(miscela.size(),3);
+            model->setHeaderData(0,Qt::Horizontal,QString("Nome composto"));
+            model->setHeaderData(1,Qt::Horizontal,QString("Moli Soluto"));
+            model->setHeaderData(2,Qt::Horizontal,QString("Molarità"));
+            QModelIndex index;
+            QVariant value;
+            for(unsigned int i=0;i<miscela.size();++i){
+                index = model->index(i,0);
+                value = QString::fromStdString(miscela[i].getNome());
+                model->setData(index,value);
+                index = model->index(i,1);
+                value = miscela.massaSoluto(miscela[i]);
+                model->setData(index,value);
+                index = model->index(i,2);
+                value = miscela.molarita(miscela[i]);
+                model->setData(index,value);
+            }
+            viewTable(model);
+            */
+        }
     }
 }
 
@@ -686,14 +662,17 @@ void Controller::apri_file(){
 //da completare
 void Controller::salva_file(const QVector<DatiGrafico> &window){
     for(int i=0;i<window.count();++i){
-        bool ok = QMessageBox::question(view,QString("Salva file"),QString("Vuole salvare il grafico ")+QString::fromStdString(model.at(i).first->getNome())+QString("?"));
+        QMessageBox::StandardButton ok = QMessageBox::question(view,QString("Salva file"),QString("Vuole salvare il grafico ")+QString::fromStdString(model.at(i).first->getNome())+QString("?"),QMessageBox::Yes | QMessageBox::No);
         //identificare il file o crearne uno
         QString fileName = model.at(i).second;
-        if(ok && fileName.isEmpty()){
+        if(ok==QMessageBox::Yes && (fileName.isEmpty()))
             fileName = QFileDialog::getSaveFileName(view,QString("Salva il grafico ")+QString::fromStdString(model.at(i).first->getNome()),QDir::homePath(),QString("*.json"));
-            model[i].second = fileName;
+        while(fileName==QDir::homePath()+tr("/elementi.json")){
+            QMessageBox::warning(view,tr("File non modificabile"),tr("Non è posibile salvare il grafico nel file elementi.json."));
+            fileName = QFileDialog::getSaveFileName(view,QString("Salva il grafico ")+QString::fromStdString(model.at(i).first->getNome()),QDir::homePath(),QString("*.json"));
         }
-        if(ok && !fileName.isEmpty()){
+        if(ok==QMessageBox::Yes && !fileName.isEmpty()){
+            model[i].second = fileName;
             QFile file(fileName);
             if(!isFileOpenWrite(file)){
                 file.close();
@@ -729,60 +708,6 @@ void Controller::salva_file(const QVector<DatiGrafico> &window){
     }
 }
 
+//da pensare a come implementarla e se implementarla
+void Controller::modifica_tabella(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles){}
 
-/*
-void Controller::menu_file_apri(){
-    /*
-     * si aprira' un semplice QFileDialog dove sara' possibile indicare il file json con i dati del grafico interessato.
-     * /
-    QString fileName = QFileDialog::getOpenFileName(this,tr("Nuova Miscela - selezionare Composto"),QDir::homePath(),tr("*.json"));
-    if(fileName.isEmpty()) return;
-
-    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-    if(!doc.isObject() && !doc.object().contains("tipologia")){
-        QMessageBox::critical(this,tr("Errore nella lettura del file"),tr("C'è stato un problema di lettura del file."));
-        return;
-    }else{
-        if(doc.object()["tipologia"]==tr("composto")){
-            Composto c = lettura_composto(&file);
-
-            DatiGrafico g;
-            aggiungiGrafico(&g);
-        }else if(doc.object()["tipologia"]==tr("miscela")){
-            Campione::Stato s = Campione::indefinito;
-            if(doc.object()["stato"].toString()==tr("indefinito"))
-                s = Campione::indefinito;
-            else if(doc.object()["stato"].toString()==tr("solido"))
-                s = Campione::solido;
-            else if(doc.object()["stato"].toString()==tr("liquido"))
-                s = Campione::liquido;
-            else if(doc.object()["stato"].toString()==tr("gassoso"))
-                s = Campione::gassoso;
-            Miscela m(doc.object()["nome"].toString().toStdString(),s,
-                    doc.object()["massa"].toDouble(),
-                    doc.object()["volume"].toDouble(),
-                    doc.object()["temperatura"].toDouble(),
-                    doc.object()["soluzione"].toBool());
-            QJsonArray lista = doc.object()["lista"].toArray();
-            for(int i=0;i<lista.count();++i){
-                QFile f(doc.object()["lista"].toArray().at(i).toString());
-                if(!file.open(QIODevice::ReadOnly)){
-                    QMessageBox::critical(this,tr("Errore nella lettura del file"),tr("C'è stato un problema di lettura del file."));
-                    i = lista.count();
-                }else{
-                    Composto c = lettura_composto(&file);
-                    if(!c.getNome().empty()){
-                        m.push_back(c);
-                    }
-                }
-            }
-
-            DatiGrafico g;
-            aggiungiGrafico(&g);
-        }else{
-            QMessageBox::critical(this,tr("Errore nella lettura del file"),tr("C'è stato un problema di lettura del file."));
-        }
-    }
-    file.close();
-}
-*/

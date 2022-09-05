@@ -108,12 +108,18 @@ QWidget* MainWindow::baseTabella(const DatiGrafico &d, QWidget* parent){
     QGridLayout *layoutOption = new QGridLayout(option);
     QPushButton *addColonna = new QPushButton(tr("Aggiungi colonna"),option);
     QPushButton *delColonna = new QPushButton(tr("Elimina colonna"),option);
+    QPushButton *addRiga = new QPushButton(tr("Aggiungi riga"),option);
+    QPushButton *delRiga = new QPushButton(tr("Elimina riga"),option);
     layoutOption->addWidget(addColonna,0,0);
     layoutOption->addWidget(delColonna,0,1);
+    layoutOption->addWidget(addRiga,1,0);
+    layoutOption->addWidget(delRiga,1,1);
     option->setLayout(layoutOption);
 
     connect(addColonna,&QPushButton::clicked,this,&MainWindow::pulsante_aggiungiColonna);
     connect(delColonna,&QPushButton::clicked,this,&MainWindow::pulsante_eliminaColonna);
+    connect(addRiga,&QPushButton::clicked,this,&MainWindow::pulsante_aggiungiRiga);
+    connect(delRiga,&QPushButton::clicked,this,&MainWindow::pulsante_eliminaRiga);
 
     layoutObj->addWidget(option);
     layoutObj->addWidget(creaTabella(d,obj));
@@ -316,7 +322,7 @@ void MainWindow::menu_file_rinomina(){
         QString s = QInputDialog::getText(this,tr("Rinomina"),tr("Inserire il titolo del grafico"));
         if(!s.isNull() && s!=grafici.at(index)->chart()->title()){
             grafici.at(index)->chart()->setTitle(s);
-            window[index].setTitolo(s); //CRASH
+            window[index].setTitolo(s);
             tab->tabBar()->setTabText(index,window.at(index).getIntestazione()+tr("*"));
         }
     }else{
@@ -366,7 +372,6 @@ void MainWindow::pulsante_aggiungiColonna(){
     int count = tabelle.at(index)->model()->columnCount();
     tabelle.at(index)->model()->insertColumn(count);
     tabelle.at(index)->model()->insertColumn(count+1);
-
     DatiLinea l;
     DatiPunto p;
     QModelIndex modelIndex;
@@ -386,7 +391,6 @@ void MainWindow::pulsante_aggiungiColonna(){
         }
         window[index].tabella.push_back(l);
         grafici.at(index)->setChart(aggiornaGraficoTorta(index));
-        grafici.at(index)->setRenderHint(QPainter::Antialiasing);
     }else{
         tabelle.at(index)->model()->setHeaderData(count,Qt::Horizontal,"x - Serie "+QString::number(count/2));
         tabelle.at(index)->model()->setHeaderData(count+1,Qt::Horizontal,"y - Serie "+QString::number(count/2));
@@ -402,16 +406,14 @@ void MainWindow::pulsante_aggiungiColonna(){
             l.push_back(p);
         }
         window[index].tabella.push_back(l);
-        if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::linea){
+        if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::linea)
             grafici.at(index)->setChart(aggiornaGraficoLinea(index));
-            grafici.at(index)->setRenderHint(QPainter::Antialiasing);
-        }else if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::punti){
+        else if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::punti)
             grafici.at(index)->setChart(aggiornaGraficoPunti(index));
-            grafici.at(index)->setRenderHint(QPainter::Antialiasing);
-        }
     }
-    grafici.at(index)->setVisible(true);
-    tabelle.at(index)->setVisible(true);
+    grafici.at(index)->setRenderHint(QPainter::Antialiasing);
+    updateUI();
+    updateUIanimation();
     tab->tabBar()->setTabText(index,window.at(index).getIntestazione()+tr("*"));
 }
 
@@ -421,17 +423,78 @@ void MainWindow::pulsante_eliminaColonna(){
     if(count>0){
         tabelle.at(index)->model()->removeColumn(count-1);
         tabelle.at(index)->model()->removeColumn(count-2);
-        window[index].tabella.pop_back(); //CRASH
-        if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::torta){
+        window[index].tabella.pop_back();
+        if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::torta)
             grafici.at(index)->setChart(aggiornaGraficoTorta(index));
-            grafici.at(index)->setRenderHint(QPainter::Antialiasing);
-        }else if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::linea){
+        else if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::linea)
             grafici.at(index)->setChart(aggiornaGraficoLinea(index));
-            grafici.at(index)->setRenderHint(QPainter::Antialiasing);
-        }else if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::punti){
+        else if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::punti)
             grafici.at(index)->setChart(aggiornaGraficoPunti(index));
-            grafici.at(index)->setRenderHint(QPainter::Antialiasing);
+        grafici.at(index)->setRenderHint(QPainter::Antialiasing);
+        updateUI();
+        updateUIanimation();
+        tab->tabBar()->setTabText(index,window.at(index).getIntestazione()+tr("*"));
+    }
+}
+
+void MainWindow::pulsante_aggiungiRiga(){
+    int index = tab->currentIndex();
+    int count = tabelle.at(index)->model()->rowCount();
+    tabelle.at(index)->model()->insertRow(count);
+    DatiPunto p;
+    QModelIndex modelIndex;
+    if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::torta){
+        for(int i=0;i<tabelle.at(index)->model()->columnCount();i+=2){
+            //nome
+            modelIndex = tabelle.at(index)->model()->index(count,i);
+            tabelle.at(index)->model()->setData(modelIndex,tr(""));
+            p.second = tr("");
+            //dato (y)
+            modelIndex = tabelle.at(index)->model()->index(count,i+1);
+            tabelle.at(index)->model()->setData(modelIndex,0.0);
+            p.first.setY(0.0);
+            window[index].tabella[i/2].push_back(p);
         }
+        grafici.at(index)->setChart(aggiornaGraficoTorta(index));
+    }else{
+        for(int i=0;i<tabelle.at(index)->model()->columnCount();i+=2){
+            //x
+            modelIndex = tabelle.at(index)->model()->index(count,i);
+            tabelle.at(index)->model()->setData(modelIndex,0.0);
+            p.first.setX(0.0);
+            //y
+            modelIndex = tabelle.at(index)->model()->index(count,i+1);
+            tabelle.at(index)->model()->setData(modelIndex,0.0);
+            p.first.setY(0.0);
+            window[index].tabella[i/2].push_back(p);
+        }
+        if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::linea)
+            grafici.at(index)->setChart(aggiornaGraficoLinea(index));
+        else if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::punti)
+            grafici.at(index)->setChart(aggiornaGraficoPunti(index));
+    }
+    grafici.at(index)->setRenderHint(QPainter::Antialiasing);
+    updateUI();
+    updateUIanimation();
+    tab->tabBar()->setTabText(index,window.at(index).getIntestazione()+tr("*"));
+}
+
+void MainWindow::pulsante_eliminaRiga(){
+    int index = tab->currentIndex();
+    int count = tabelle.at(index)->model()->rowCount();
+    if(count>0){
+        tabelle.at(index)->model()->removeRow(count-1);
+        for(int i=0;i<window.at(index).tabella.count();++i)
+            window[index].tabella[i].pop_back();
+        if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::torta)
+            grafici.at(index)->setChart(aggiornaGraficoTorta(index));
+        else if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::linea)
+            grafici.at(index)->setChart(aggiornaGraficoLinea(index));
+        else if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::punti)
+            grafici.at(index)->setChart(aggiornaGraficoPunti(index));
+        grafici.at(index)->setRenderHint(QPainter::Antialiasing);
+        updateUI();
+        updateUIanimation();
         tab->tabBar()->setTabText(index,window.at(index).getIntestazione()+tr("*"));
     }
 }
@@ -451,11 +514,10 @@ void MainWindow::modificaCella(){
             }
         }
         grafici.at(index)->setChart(aggiornaGraficoTorta(index));
-        grafici.at(index)->setRenderHint(QPainter::Antialiasing);
     }else{
         QModelIndex modelIndexX,modelIndexY;
         for(int j=0;j<window[index].tabella.count();++j){
-            for(int i=0;i<window[index].tabella.at(j).count();++i){ //CRASH(aggiungi colonna) CRASH modifica cella (getLinea(j))
+            for(int i=0;i<window[index].tabella.at(j).count();++i){
                 //x e y
                 modelIndexX = tabelle.at(index)->model()->index(i,j*2);
                 modelIndexY = tabelle.at(index)->model()->index(i,j*2+1);
@@ -463,13 +525,13 @@ void MainWindow::modificaCella(){
                 window[index].tabella[j][i].first.setY(modelIndexY.data().toInt());
             }
         }
-        if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::linea){
+        if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::linea)
             grafici.at(index)->setChart(aggiornaGraficoLinea(index));
-            grafici.at(index)->setRenderHint(QPainter::Antialiasing);
-        }else if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::punti){
+        else if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::punti)
             grafici.at(index)->setChart(aggiornaGraficoPunti(index));
-            grafici.at(index)->setRenderHint(QPainter::Antialiasing);
-        }
     }
+    grafici.at(index)->setRenderHint(QPainter::Antialiasing);
+    updateUI();
+    updateUIanimation();
     tab->tabBar()->setTabText(index,window.at(index).getIntestazione()+tr("*"));
 }
