@@ -7,8 +7,6 @@
 #include "model/miscela.h"
 #include "view/mainwindow.h"
 
-#include <QString>
-
 typedef QPair<Campione*,QString> Path;
 
 class Controller: public QWidget
@@ -25,12 +23,11 @@ private:
     bool isFileOpenWrite(QFile&);
 
     void insertInModel(Campione*, QString);
-    void viewTable(QAbstractItemModel*);
 
-    Campione::Stato fromStringToStato(QString);
-    QString fromStatoToString(Campione::Stato);
-    DatiGrafico::TipoGrafico fromStringToGrafico(QString);
-    QString fromGraficoToString(DatiGrafico::TipoGrafico);
+    static Campione::Stato fromStringToStato(QString);
+    static QString fromStatoToString(Campione::Stato);
+    static DatiGrafico::TipoGrafico fromStringToGrafico(QString);
+    static QString fromGraficoToString(DatiGrafico::TipoGrafico);
 
     Elemento crea_elemento();
     Composto crea_composto();
@@ -48,10 +45,6 @@ public slots:
     void nuovo_file();
     void apri_file();
     void salva_file(const QVector<DatiGrafico>&);
-
-    //da pensare a come implementarla e se implementarla
-    void modifica_tabella(const QModelIndex &topLeft,const QModelIndex &bottomRight,const QVector<int> &roles = QVector<int>());
-
 };
 
 #endif // CONTROLLER_H

@@ -177,11 +177,15 @@ bool Composto::uguale(Nodo* n1, Nodo* n2){
     return n1->info==n2->info && uguale(n1->next,n2->next);
 }
 
-Composto::Composto(std::string f, std::string n, Stato s, double m, double v, double t, unsigned int nm):
+Composto::Composto(std::string f, std::string n, Stato s, double m, double v, double t, double nm):
     Sostanza(n,s,m,v,t,nm),formulaChimica(f),last(nullptr),first(nullptr){}
 
 Composto::Composto(const Composto &c):
     Sostanza(c.getNome(),c.getMateria(),c.getMassa(),c.getVolume(),c.getTemperatura(),c.getNMoli()),formulaChimica(c.formulaChimica),last(nullptr),first(copia(c.first,last)){}
+
+Composto* Composto::clone()const{
+    return new Composto(*this);
+}
 
 Composto& Composto::operator=(const Composto& c){
     if(this!=&c){

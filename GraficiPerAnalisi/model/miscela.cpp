@@ -173,6 +173,8 @@ Miscela::Miscela(std::string n, Stato s, double m, double v, double t, bool sol)
 Miscela::Miscela(const Miscela& m):
     Campione(m.getNome(),m.getMateria(),m.getMassa(),m.getVolume(),m.getTemperatura()),soluzione(m.soluzione),last(nullptr),first(copia(m.first,last)){}
 
+Miscela* Miscela::clone()const{return new Miscela(*this);}
+
 Miscela& Miscela::operator=(const Miscela& m){
     if(this!=&m){
         Campione::operator=(m);
@@ -189,11 +191,11 @@ Miscela::~Miscela(){
 bool Miscela::isSoluzione()const{
     return soluzione;
 }
-
+/*
 void Miscela::setSoluzione(bool s){
     soluzione = s;
 }
-
+*/
 double Miscela::massaSoluto(const Composto& c)const{
     if(!soluzione) throw std::string("Non è una soluzione");
     Nodo* aux = first;

@@ -6,19 +6,19 @@
 class Sostanza: public Campione
 {
 private:
-    unsigned int nMoli;
+    double nMoli;
     double massaMolare; //massaMolare = massa/nMoli
 
 public:
-    Sostanza(std::string="",Stato=indefinito, double=0.0, double=0.0, double=0.0,unsigned int=0);
-    Sostanza(const Sostanza& s);
-    ~Sostanza();
+    Sostanza(std::string="",Stato=indefinito, double=0.0, double=0.0, double=0.0,double=0.0);
+    //Sostanza(const Sostanza& s);
+    virtual ~Sostanza();
 
-    unsigned int getNMoli()const;
+    double getNMoli()const;
     double getMassaMolare()const;
 
-    void setNMoli(unsigned int);
-    virtual void setMassa(double);
+    void setNMoli(double);
+    virtual void setMassa(double) override;
 
 };
 

@@ -14,7 +14,7 @@ private:
         Nodo(const Composto&, Nodo* = nullptr, Nodo* = nullptr);
     };
 
-    bool soluzione;
+    const bool soluzione;
     Nodo *last, *first;
     static Nodo* copia(Nodo*,Nodo*&);
     static void distruggi(Nodo*);
@@ -59,11 +59,12 @@ public:
 
     Miscela(std::string="",Stato=indefinito, double=0.0, double=0.0, double=0.0, bool=true);
     Miscela(const Miscela&);
+    virtual Miscela* clone()const;
+
     Miscela& operator=(const Miscela&);
-    ~Miscela();
+    virtual ~Miscela();
 
     bool isSoluzione()const;
-    void setSoluzione(bool);
 
     double massaSoluto(const Composto&)const;
     double volumeSoluto(const Composto&)const;

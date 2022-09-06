@@ -59,10 +59,11 @@ public:
         const_iterator operator--(int);
     };
 
-    Composto(std::string="",std::string="",Stato=indefinito, double=0.0, double=0.0, double=0.0,unsigned int=0);
+    Composto(std::string="",std::string="",Stato=indefinito, double=0.0, double=0.0, double=0.0,double=0.0);
     Composto(const Composto&);
+    virtual Composto* clone()const;
     Composto& operator=(const Composto&);
-    ~Composto();
+    virtual ~Composto();
 
     bool operator==(const Composto&)const;
 
