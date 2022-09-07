@@ -405,7 +405,7 @@ void Controller::nuovo_file(){
     bool ok;
     QStringList items;
     items << tr("Elemento") << tr("Composto") << tr("Miscela") << tr("Altro");
-    QString s = QInputDialog::getItem(view,tr("Nuovo grafico"),tr("Che cosa vuole creare?"),items,0,false,&ok);
+    QString s = QInputDialog::getItem(view,tr("Nuovo oggetto"),tr("Che cosa vuole creare?"),items,0,false,&ok);
     if(!ok) return;
     if(s==tr("Elemento")){
         crea_elemento();
