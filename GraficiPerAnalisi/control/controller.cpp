@@ -14,24 +14,6 @@
 #include <QDebug>
 
 Controller::Controller(QWidget* parent):QWidget(parent),view(new MainWindow(parent)){
-    if(!QFile::exists(QDir::homePath()+"/elementi.json")){
-        QFile file(QDir::homePath()+"/elementi.json");
-        if(file.open(QIODevice::ReadWrite)){
-            QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-            QJsonObject elemento;
-            elemento.insert(tr("nome"),tr("???"));
-            elemento.insert(tr("numAtomico"),0);
-            elemento.insert(tr("numMassa"),0);
-            QJsonArray chiavi;
-            chiavi.push_back(tr("0"));
-            QJsonObject contenuto;
-            contenuto.insert(tr("0"),elemento);
-            contenuto.insert(tr("chiavi"),chiavi);
-            doc.setObject(contenuto);
-            file.write(doc.toJson());
-            file.close();
-        }
-    }
     view->show();qDebug() << "";
     connect(view,&MainWindow::nuovo,this,&Controller::nuovo_file);
     connect(view,&MainWindow::apri,this,&Controller::apri_file);
