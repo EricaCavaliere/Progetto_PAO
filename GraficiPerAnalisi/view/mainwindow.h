@@ -17,7 +17,7 @@ public:
     explicit MainWindow(QWidget* = 0);
     ~MainWindow();
 
-    void aggiungiGrafico(const DatiGrafico &);
+    void aggiungiGrafico(const DatiGrafico& = DatiGrafico());
 
 private:
     void impostaMenuBar(QMenuBar*);

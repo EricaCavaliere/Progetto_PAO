@@ -11,7 +11,6 @@ private:
 
 public:
     Sostanza(std::string="",Stato=indefinito, double=0.0, double=0.0, double=0.0,double=0.0);
-    //Sostanza(const Sostanza& s);
     virtual ~Sostanza();
 
     double getNMoli()const;

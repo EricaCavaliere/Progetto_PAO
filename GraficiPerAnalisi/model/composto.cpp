@@ -82,7 +82,6 @@ Composto::const_iterator::const_iterator(Nodo* n,bool pte):nodo(n),pastTheEnd(pt
 
 Composto::const_iterator::const_iterator():nodo(nullptr),pastTheEnd(false){}
 
-//questo non c'e'
 Composto::const_iterator::const_iterator(const const_iterator& i):nodo(i.nodo),pastTheEnd(i.pastTheEnd){}
 
 const Elemento& Composto::const_iterator::operator*()const{

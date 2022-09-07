@@ -147,11 +147,9 @@ QTableView* MainWindow::creaTabella(const DatiGrafico &d, QWidget *parent){
             QVariant value;
             for(int i=0;i<d.tabella.at(0).count();++i){
                 for(int j=0;j<d.tabella.count();++j){
-                    //x
                     index = model->index(i,j*2);
                     value = d.tabella.at(j).at(i).first.x();
                     model->setData(index,value);
-                    //y
                     index = model->index(i,j*2+1);
                     value = d.tabella.at(j).at(i).first.y();
                     model->setData(index,value);
@@ -171,11 +169,9 @@ QTableView* MainWindow::creaTabella(const DatiGrafico &d, QWidget *parent){
             QVariant value;
             for(int i=0;i<d.tabella.at(0).count();++i){
                 for(int j=0;j<d.tabella.count();++j){
-                    //nome
                     index = model->index(i,j*2);
                     value = d.tabella.at(j).at(i).second;
                     model->setData(index,value);
-                    //dato (y)
                     index = model->index(i,j*2+1);
                     value = d.tabella.at(j).at(i).first.y();
                     model->setData(index,value);
@@ -379,11 +375,9 @@ void MainWindow::pulsante_aggiungiColonna(){
         tabelle.at(index)->model()->setHeaderData(count,Qt::Horizontal,"Torta "+QString::number(count/2)+" - fette");
         tabelle.at(index)->model()->setHeaderData(count+1,Qt::Horizontal,"Torta "+QString::number(count/2)+" - dati");
         for(int i=0;i<tabelle.at(index)->model()->rowCount();++i){
-            //nome
             modelIndex = tabelle.at(index)->model()->index(i,count);
             tabelle.at(index)->model()->setData(modelIndex,tr(""));
             p.second = tr("");
-            //dato (y)
             modelIndex = tabelle.at(index)->model()->index(i,count+1);
             tabelle.at(index)->model()->setData(modelIndex,0.0);
             p.first.setY(0.0);
@@ -395,11 +389,9 @@ void MainWindow::pulsante_aggiungiColonna(){
         tabelle.at(index)->model()->setHeaderData(count,Qt::Horizontal,"x - Serie "+QString::number(count/2));
         tabelle.at(index)->model()->setHeaderData(count+1,Qt::Horizontal,"y - Serie "+QString::number(count/2));
         for(int i=0;i<tabelle.at(index)->model()->rowCount();++i){
-            //x
             modelIndex = tabelle.at(index)->model()->index(i,count);
             tabelle.at(index)->model()->setData(modelIndex,0.0);
             p.first.setX(0.0);
-            //y
             modelIndex = tabelle.at(index)->model()->index(i,count+1);
             tabelle.at(index)->model()->setData(modelIndex,0.0);
             p.first.setY(0.0);
@@ -445,11 +437,9 @@ void MainWindow::pulsante_aggiungiRiga(){
     QModelIndex modelIndex;
     if(window.at(index).getTipo()==DatiGrafico::TipoGrafico::torta){
         for(int i=0;i<tabelle.at(index)->model()->columnCount();i+=2){
-            //nome
             modelIndex = tabelle.at(index)->model()->index(count,i);
             tabelle.at(index)->model()->setData(modelIndex,tr(""));
             p.second = tr("");
-            //dato (y)
             modelIndex = tabelle.at(index)->model()->index(count,i+1);
             tabelle.at(index)->model()->setData(modelIndex,0.0);
             p.first.setY(0.0);
@@ -458,11 +448,9 @@ void MainWindow::pulsante_aggiungiRiga(){
         grafici.at(index)->setChart(aggiornaGraficoTorta(index));
     }else{
         for(int i=0;i<tabelle.at(index)->model()->columnCount();i+=2){
-            //x
             modelIndex = tabelle.at(index)->model()->index(count,i);
             tabelle.at(index)->model()->setData(modelIndex,0.0);
             p.first.setX(0.0);
-            //y
             modelIndex = tabelle.at(index)->model()->index(count,i+1);
             tabelle.at(index)->model()->setData(modelIndex,0.0);
             p.first.setY(0.0);
@@ -505,10 +493,8 @@ void MainWindow::modificaCella(){
         QModelIndex modelIndex;
         for(int j=0;j<window[index].tabella.count();++j){
             for(int i=0;i<window[index].tabella.at(j).count();++i){
-                //nome
                 modelIndex = tabelle.at(index)->model()->index(i,j*2);
                 window[index].tabella[j][i].second = modelIndex.data().toString();
-                //dato (y)
                 modelIndex = tabelle.at(index)->model()->index(i,j*2+1);
                 window[index].tabella[j][i].first.setY(modelIndex.data().toInt());
             }
@@ -518,7 +504,6 @@ void MainWindow::modificaCella(){
         QModelIndex modelIndexX,modelIndexY;
         for(int j=0;j<window[index].tabella.count();++j){
             for(int i=0;i<window[index].tabella.at(j).count();++i){
-                //x e y
                 modelIndexX = tabelle.at(index)->model()->index(i,j*2);
                 modelIndexY = tabelle.at(index)->model()->index(i,j*2+1);
                 window[index].tabella[j][i].first.setX(modelIndexX.data().toInt());

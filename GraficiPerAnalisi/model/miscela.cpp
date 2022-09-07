@@ -191,11 +191,7 @@ Miscela::~Miscela(){
 bool Miscela::isSoluzione()const{
     return soluzione;
 }
-/*
-void Miscela::setSoluzione(bool s){
-    soluzione = s;
-}
-*/
+
 double Miscela::massaSoluto(const Composto& c)const{
     if(!soluzione) throw std::string("Non è una soluzione");
     Nodo* aux = first;

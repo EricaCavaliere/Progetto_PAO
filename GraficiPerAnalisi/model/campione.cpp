@@ -3,9 +3,6 @@
 Campione::Campione(std::string n, Stato s, double m, double v, double t):
     nome(n), materia(s), massa(m), volume(v), temperatura(t){}
 
-//Campione::Campione(const Campione &c):
-//    nome(c.nome), materia(c.materia), massa(c.massa), volume(c.volume), temperatura(c.temperatura){}
-
 Campione::~Campione(){}
 
 std::string Campione::getNome()const{

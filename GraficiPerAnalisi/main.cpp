@@ -1,4 +1,3 @@
-#include "view/mainwindow.h"
 #include "control/controller.h"
 #include <QApplication>
 #include <QString>
