@@ -1,7 +1,7 @@
 # Progetto PAO
 Progetto di Programmazione ad Oggetti(PAO) per l'anno 2021/2022 per il corso del prof Ranzato, UniPD, Informatica
 
-#Feedback Progetto da parte del prof Ranzato
+##Feedback Progetto da parte del prof Ranzato
 Valutazione del progetto: piu' che buono
 
 Orientamento ad oggetti
