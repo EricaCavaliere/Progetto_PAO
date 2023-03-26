@@ -2,7 +2,7 @@
 Progetto di Programmazione ad Oggetti(PAO) per l'anno 2021/2022 per il corso del prof Ranzato, UniPD, Informatica
 
 ## Specifiche del Progetto
-Tutte i vincoli e le varie richieste sono visibili nel file [specificaProgetto_PaO_21-22.pdf](./specificaProgetto_PaO_21-22.pdf)
+Tutti i vincoli e le varie richieste sono visibili nel file [specificaProgetto_PaO_21-22.pdf](./specificaProgetto_PaO_21-22.pdf)
 
 ## Feedback Progetto da parte del prof Ranzato
 Valutazione del progetto: piu' che buono
